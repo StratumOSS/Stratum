@@ -24,7 +24,7 @@ def _cfn(loader, node):
     return loader.construct_mapping(node)
 
 
-for _tag in ("!Ref", "!Sub", "!GetAtt"):
+for _tag in ("!Ref", "!Sub", "!GetAtt", "!Equals", "!If"):
     CfnLoader.add_constructor(_tag, _cfn)
 
 
@@ -34,7 +34,11 @@ def test_aws_onboarding_templates_have_external_id_default():
         "deploy/aws/stratum-builder-role.yaml",
     ):
         data = yaml.load((ROOT / relpath).read_text(), Loader=CfnLoader)
+        trusted_principal = data["Parameters"]["TrustedPrincipalArn"]
         external_id = data["Parameters"]["ExternalId"]
+        assert trusted_principal["Default"] == ""
+        assert "root" in trusted_principal["AllowedPattern"]
+        assert "UseDefaultTrustedPrincipal" in data["Conditions"]
         assert external_id["MinLength"] == 8
         assert len(external_id["Default"]) >= 8
         assert {"StratumRoleArn", "ExternalId", "InstanceProfileName", "RegionHint"} <= set(data["Outputs"])

@@ -27,11 +27,11 @@ For the public GitHub templates:
 
 ## Required Parameters
 
-- `TrustedPrincipalArn`: IAM user or role ARN allowed to assume the Stratum role. For local OSS usage, this is usually the IAM user or role configured in your local AWS profile.
+- `TrustedPrincipalArn`: IAM principal allowed to assume the Stratum role. The default trusts the current AWS account root so test stacks can be created without looking up an ARN. For production, replace it with the specific IAM user or role configured for Stratum.
 - `ExternalId`: A unique string you paste into Stratum along with the role ARN. The template default, `stratum-onboarding`, is provided so demos do not fail validation; replace it with a customer-unique value for production.
 - `RoleNamePrefix`: Optional name prefix for created IAM roles.
 
-The trusted principal must also have permission to call `sts:AssumeRole` on the generated Stratum role. If you use a local AWS profile, set `TrustedPrincipalArn` to that profile's IAM user or role ARN.
+The trusted principal must also have permission to call `sts:AssumeRole` on the generated Stratum role. If you use a local AWS profile in production, set `TrustedPrincipalArn` to that profile's IAM user or role ARN.
 
 ## Stratum Fields
 

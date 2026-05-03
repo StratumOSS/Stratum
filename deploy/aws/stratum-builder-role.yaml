@@ -4,8 +4,9 @@ Description: "Stratum builder onboarding role and EC2 SSM instance profile."
 Parameters:
   TrustedPrincipalArn:
     Type: String
-    Description: "IAM user or role ARN allowed to assume the Stratum builder role."
-    AllowedPattern: "^arn:aws:iam::[0-9]{12}:(user|role)/.+$"
+    Default: ""
+    Description: "Optional IAM principal allowed to assume the Stratum builder role. Leave blank for test stacks to trust this AWS account root; use a specific IAM user or role ARN for production."
+    AllowedPattern: "^$|^arn:aws:iam::[0-9]{12}:((user|role)/.+|root)$"
   ExternalId:
     Type: String
     Default: "stratum-onboarding"
@@ -16,6 +17,9 @@ Parameters:
     Default: "Stratum"
     Description: "Prefix for IAM roles and instance profile names."
     AllowedPattern: "^[A-Za-z0-9+=,.@_-]{1,32}$"
+
+Conditions:
+  UseDefaultTrustedPrincipal: !Equals [!Ref TrustedPrincipalArn, ""]
 
 Resources:
   StratumBuilderRole:
@@ -28,7 +32,10 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Ref TrustedPrincipalArn
+              AWS: !If
+                - UseDefaultTrustedPrincipal
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+                - !Ref TrustedPrincipalArn
             Action: sts:AssumeRole
             Condition:
               StringEquals:

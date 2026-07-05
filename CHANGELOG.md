@@ -6,6 +6,61 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.0] — 2026-07-05
+
+### Added
+
+**Cloud Onboarding**
+
+- AWS: `POST /api/integrations/aws/import-stack` imports a CloudFormation
+  stack's outputs (role ARN, ExternalId, instance profile) directly into the
+  credential store — no manual copy-paste of onboarding template outputs.
+  Onboarding CloudFormation templates are served locally at
+  `GET /api/integrations/aws/templates/{template_name}` instead of linking out.
+- Azure and GCP onboarding flows (role/service-account templates, onboarding
+  scripts under `deploy/azure/`, `deploy/gcp/`).
+- Default `ExternalId` and trusted-principal handling for AWS onboarding.
+- Community blueprint library (`blueprints/`) covering Alma, Rocky, Debian,
+  Ubuntu, and Amazon Linux across CIS profiles and providers.
+
+### Fixed
+
+- Public-facing docs, the README, and generated SARIF compliance reports no
+  longer reference the private development repository — all point at
+  `github.com/rrskris/Stratum`.
+- `POST /api/pipeline/build` no longer 500s when a `region` override is
+  supplied (`TargetSpec` has no `region` field; the value is now recorded on
+  the job for display instead of an invalid attribute assignment).
+- AI Builder agent: `start_build` now updates the job it already created
+  instead of silently starting an unrelated one under a different id.
+
+### Security
+
+- Every API/UI router now requires authentication (an admin token via HTTP
+  Basic, or an API key) except `/health` and the already-authenticated
+  `/api/pipeline` — previously most routes, including the one returning raw
+  stored cloud credentials, had none.
+- Fixed a path-traversal bug in blueprint upload that allowed writing
+  attacker-controlled file content to an arbitrary path on disk.
+- Added SSRF protection for webhook registration and delivery (blocks
+  loopback/private/link-local/metadata addresses).
+- The credential store's encryption key is now derived with a random,
+  per-install salt instead of a fixed constant shared by every deployment;
+  existing installs migrate automatically on next load.
+- Proxmox TLS certificate verification is now a visible, configurable option
+  instead of being silently hardcoded off.
+- Added a request size cap on blueprint YAML uploads.
+- The AI Builder agent now requires explicit confirmation before provisioning
+  real cloud infrastructure by default (`STRATUM_AGENT_REQUIRE_CONFIRMATION`).
+
+### Community
+
+- Added `CODE_OF_CONDUCT.md`, `SECURITY.md`, issue templates, and a PR
+  template.
+- Added `authors`, `classifiers`, and `[project.urls]` to `pyproject.toml`.
+
+---
+
 ## [0.3.0] — 2026-04-16
 
 ### Added

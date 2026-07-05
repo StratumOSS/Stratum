@@ -5,7 +5,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![Version](https://img.shields.io/badge/version-0.3.0-brightgreen)]()
-[![CI](https://github.com/sachinponnapalli/Stratum/actions/workflows/ci.yml/badge.svg)](https://github.com/sachinponnapalli/Stratum/actions/workflows/ci.yml)
+[![CI](https://github.com/rrskris/Stratum/actions/workflows/ci.yml/badge.svg)](https://github.com/rrskris/Stratum/actions/workflows/ci.yml)
 
 Stratum is a self-hosted DevSecOps platform that turns a declarative YAML blueprint into a fully-hardened, CIS/STIG-benchmarked golden image — automatically, on any cloud.
 
@@ -89,7 +89,7 @@ HardeningBlueprint (YAML)  ──or──  5-Step Guided Wizard
 ### Docker (recommended)
 
 ```bash
-git clone https://github.com/sachinponnapalli/Stratum.git
+git clone https://github.com/rrskris/Stratum.git
 cd Stratum
 docker compose up
 ```
@@ -143,7 +143,7 @@ The templates are intentionally readable so customers can evaluate every permiss
 **Prerequisites:** Python 3.11+, [uv](https://docs.astral.sh/uv/), Ansible, OpenSCAP
 
 ```bash
-git clone https://github.com/sachinponnapalli/Stratum.git
+git clone https://github.com/rrskris/Stratum.git
 cd Stratum
 
 # Install all provider SDKs + dev tools
@@ -612,6 +612,14 @@ PENDING → PROVISIONING → HARDENING → SCANNING → SNAPSHOTTING → COMPLET
 Each transition emits live log events. The UI polls every 2 seconds via HTMX.
 
 ---
+
+## Contributing
+
+Bug reports, feature requests, and PRs are welcome — see
+[CONTRIBUTING.md](CONTRIBUTING.md) for the dev workflow, code style, and
+provider/blueprint contribution guides. Please follow the
+[Code of Conduct](CODE_OF_CONDUCT.md). Found a security issue? See
+[SECURITY.md](SECURITY.md) instead of opening a public issue.
 
 ## License
 

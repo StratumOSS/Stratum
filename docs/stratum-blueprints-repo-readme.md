@@ -1,6 +1,6 @@
 # stratum-blueprints
 
-**The community blueprint library for [Stratum](https://github.com/sachinponnapalli/Stratum) — hardening controls from every major framework, ready to build.**
+**The community blueprint library for [Stratum](https://github.com/rrskris/Stratum) — hardening controls from every major framework, ready to build.**
 
 [![Validate Blueprints](https://github.com/stratum-community/stratum-blueprints/actions/workflows/validate.yml/badge.svg)](https://github.com/stratum-community/stratum-blueprints/actions/workflows/validate.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
@@ -166,7 +166,7 @@ cd stratum-blueprints
 
 ```bash
 uv venv && source .venv/bin/activate
-uv pip install "stratum[validate] @ git+https://github.com/sachinponnapalli/Stratum.git"
+uv pip install "stratum[validate] @ git+https://github.com/rrskris/Stratum.git"
 ```
 
 Or if you have a local Stratum checkout:

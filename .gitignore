@@ -23,6 +23,8 @@ uv.lock
 # Stratum runtime data (never commit credentials or build artifacts)
 data/credentials.enc
 data/.stratum_key
+data/.stratum_salt
+data/.admin_token
 data/audits/
 data/builds/
 data/audit_jobs.json

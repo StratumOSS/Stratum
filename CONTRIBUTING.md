@@ -7,6 +7,10 @@ Thank you for your interest in contributing! Stratum is an open-core, multi-clou
 DevSecOps platform for reproducible OS hardening. All contributions — code, blueprint
 templates, bug reports, documentation — are welcome.
 
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md) in all project spaces.
+Found a security vulnerability? See [SECURITY.md](SECURITY.md) instead of
+opening a public issue.
+
 ---
 
 ## Table of Contents
@@ -26,7 +30,7 @@ templates, bug reports, documentation — are welcome.
 ## Getting Started
 
 ```bash
-git clone https://github.com/vamshi-santhapuri/stratum.git
+git clone https://github.com/rrskris/Stratum.git
 cd stratum
 
 # Install with all provider extras

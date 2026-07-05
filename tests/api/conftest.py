@@ -13,6 +13,7 @@ Strategy:
 
 from __future__ import annotations
 
+import base64
 from pathlib import Path
 from unittest.mock import patch
 
@@ -23,6 +24,8 @@ from fastapi.testclient import TestClient
 import stratum.core.api_keys as ak_mod
 import stratum.core.notifications as notif_mod
 from stratum.core import auditor as audit_mod
+
+_TEST_ADMIN_TOKEN = "test-admin-token"
 
 # ---------------------------------------------------------------------------
 # Minimal valid profile YAML written to a temp dir for profile resolution
@@ -88,6 +91,9 @@ def _isolate_stores(tmp_path, monkeypatch, profiles_tmp):
     user_dir.mkdir(exist_ok=True)
     monkeypatch.setattr(settings, "user_profiles_dir", user_dir)
 
+    # Fixed admin token so `client` can authenticate deterministically
+    monkeypatch.setattr(settings, "stratum_admin_token", _TEST_ADMIN_TOKEN)
+
     yield
 
     ak_mod._keys.clear()
@@ -105,13 +111,23 @@ def app():
 
 @pytest.fixture
 def client(app, profiles_tmp, monkeypatch):
-    """TestClient wrapping the full app. init_registry is a no-op."""
+    """TestClient wrapping the full app. init_registry is a no-op.
+
+    Pre-authenticated with the fixed test admin token (HTTP Basic) so existing
+    tests exercising feature behaviour don't need to know about auth. Tests
+    that specifically exercise the auth gate should build their own
+    unauthenticated ``TestClient(app)`` instead of using this fixture.
+    """
     from stratum.config import settings
 
     monkeypatch.setattr(settings, "profiles_dir", profiles_tmp)
 
     with patch("stratum.main.init_registry"):
         with TestClient(app, raise_server_exceptions=True) as c:
+            # A default header (not `c.auth`) so tests that pass an explicit
+            # Authorization header (e.g. to exercise /api/pipeline's own Bearer
+            # check) override it per-request instead of an auth flow clobbering it.
+            c.headers["Authorization"] = "Basic " + base64.b64encode(f"admin:{_TEST_ADMIN_TOKEN}".encode()).decode()
             yield c
 
 

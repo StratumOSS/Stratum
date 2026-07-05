@@ -31,6 +31,11 @@ services:
       # Without this, a random key is auto-generated and stored in ./data/.stratum_key
       # - STRATUM_SECRET_KEY=change-me-to-a-strong-passphrase
 
+      # Admin login (HTTP Basic Auth, any username + this as the password).
+      # Without this, a random token is generated on first startup — check
+      # `docker compose logs stratum` or ./data/.admin_token for it.
+      # - STRATUM_ADMIN_TOKEN=change-me-to-a-strong-random-token
+
       # --- AI Builder: pick ONE backend and uncomment the relevant block ---
 
       # Anthropic (default)

@@ -8,7 +8,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from stratum import __version__
@@ -20,6 +20,7 @@ from stratum.api import registry as registry_api
 from stratum.api import webhooks as webhooks_api
 from stratum.api.integrations import credential_store
 from stratum.config import settings
+from stratum.core.auth import require_admin, require_admin_or_key
 from stratum.core.registry import RegistrySource, init_registry
 from stratum.plugins.registry import registry
 
@@ -32,6 +33,10 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from stratum.core.auth import get_admin_token
+
+    get_admin_token()  # generate + log on first boot, so it's visible before any request
+
     credential_store.load()
     logger.info("Credential store ready (data dir: %s)", settings.data_dir)
 
@@ -97,17 +102,24 @@ if _static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 
 # Routers
-app.include_router(ui.router)
-app.include_router(blueprints.router)
-app.include_router(builder.router)
-app.include_router(auditor.router)
-app.include_router(integrations.router)
-app.include_router(registry_api.router)
-app.include_router(plugins.router)
-app.include_router(agent_api.router)
+# `pipeline` enforces its own per-route API-key check (CI/automation surface).
+# `integrations` and `api_keys` manage cloud credentials / key issuance, so they
+# require the stronger admin-only gate. Everything else accepts either the
+# admin token or a valid API key.
+_auth = [Depends(require_admin_or_key)]
+_admin_only = [Depends(require_admin)]
+
+app.include_router(ui.router, dependencies=_auth)
+app.include_router(blueprints.router, dependencies=_auth)
+app.include_router(builder.router, dependencies=_auth)
+app.include_router(auditor.router, dependencies=_auth)
+app.include_router(integrations.router, dependencies=_admin_only)
+app.include_router(registry_api.router, dependencies=_auth)
+app.include_router(plugins.router, dependencies=_auth)
+app.include_router(agent_api.router, dependencies=_auth)
 app.include_router(pipeline_api.router)
-app.include_router(webhooks_api.router)
-app.include_router(api_keys_api.router)
+app.include_router(webhooks_api.router, dependencies=_auth)
+app.include_router(api_keys_api.router, dependencies=_admin_only)
 
 
 @app.get("/health")

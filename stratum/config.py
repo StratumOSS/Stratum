@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     user_profiles_dir: Path = Path("profiles/user")
     data_dir: Path = Path("data")
     stratum_secret_key: str | None = None
+    stratum_admin_token: str | None = None
+    stratum_agent_require_confirmation: bool = True
     debug: bool = False
     strict_plugins: bool = True
     registry_url: str = "https://raw.githubusercontent.com/stratum-community/profiles/main"

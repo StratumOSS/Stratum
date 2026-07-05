@@ -39,12 +39,16 @@ def _isolate_stores(tmp_path, monkeypatch):
 
 
 @pytest.fixture
-def smoke_client():
+def smoke_client(monkeypatch):
     """TestClient that patches init_registry to avoid network calls on startup."""
+    from stratum.config import settings
     from stratum.main import app
+
+    monkeypatch.setattr(settings, "stratum_admin_token", "test-admin-token")
 
     with patch("stratum.core.registry.init_registry"):
         with TestClient(app, raise_server_exceptions=True) as c:
+            c.auth = ("admin", "test-admin-token")
             yield c
 
 

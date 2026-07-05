@@ -26,8 +26,11 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Galaxy role identifiers in `_provider_utils.py`'s OS→role map used the ansible-lockdown GitHub repo name/casing (e.g. `UBUNTU22-CIS`) instead of the actual installable Galaxy package name (`ubuntu22_cis`) — `ansible-galaxy install` was failing with "role not found" for every OS. Debian 12 is a particularly non-obvious case: the Galaxy name is `deb12_cis`, not `debian12_cis`. `os_catalog.py`'s `lockdown_roles` field (used by the Builder wizard UI) had the same bug.
 - Several ansible-lockdown roles mix git tag formats (`V1.0.0` alongside `1.1.0`), which made `ansible-galaxy install <role>` with no version qualifier fail outright trying to resolve "latest". Now pins a known-good version for each auto-resolved role.
 - `_provider_utils.run_remote_cmd`'s error message only included the command's stderr, but most callers redirect stderr into stdout (`... 2>&1`) — failures were reported with an empty, useless message. Now includes both streams.
+- `install_oscap_on_remote` bundled `openscap-scanner` with `scap-security-guide` (the RHEL/Fedora package name — doesn't exist for Debian/Ubuntu) and `ssg-debderived` (doesn't exist at all) into the same `apt-get install` call, failing the entire install even where `openscap-scanner` itself is available (Debian 12, Ubuntu 24.04+). Now installs it alone on Debian-family targets.
 
-All three were found by actually running a full build end-to-end against a local KVM guest rather than relying on mocked tests alone.
+All four were found by actually running a full build end-to-end against a local KVM guest rather than relying on mocked tests alone.
+
+**Known gap, not yet fixed:** Ubuntu 22.04 has no `openscap-scanner` package via apt in any channel (it first appears in 24.04), and getting real SCAP content (the XCCDF datastream files) onto any Debian-family target still needs a separate fix (no distro package reliably provides it) — tracked in `CONTRIBUTING.md`. Ansible-Lockdown hardening itself is unaffected on any OS; only the OpenSCAP scan step is.
 
 ---
 

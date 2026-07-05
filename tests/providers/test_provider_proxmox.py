@@ -93,6 +93,31 @@ def test_get_proxmox_token_auth_accepted():
     assert result is not None
 
 
+@pytest.mark.parametrize(
+    ("stored_value", "expected"),
+    [
+        (False, False),
+        ("false", False),  # a stored string "false" must not be truthy
+        (True, True),
+        ("true", True),
+    ],
+)
+def test_get_proxmox_verify_ssl_coercion(stored_value, expected):
+    mod, mock_proxmoxer = _load_proxmox()
+    mock_proxmoxer.ProxmoxAPI.return_value = MagicMock()
+    with patch.dict(sys.modules, {"proxmoxer": mock_proxmoxer}):
+        mod._get_proxmox(
+            {
+                "host": "proxmox.lab.local",
+                "user": "root@pam",
+                "token_name": "stratum",
+                "token_value": "abc123",
+                "verify_ssl": stored_value,
+            }
+        )
+    assert mock_proxmoxer.ProxmoxAPI.call_args.kwargs["verify_ssl"] is expected
+
+
 # ---------------------------------------------------------------------------
 # test_connection — success and failure paths
 # ---------------------------------------------------------------------------

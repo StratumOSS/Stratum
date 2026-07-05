@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from cryptography.fernet import Fernet, InvalidToken
+
 from stratum.api.integrations import CredentialStore
 
 # ---------------------------------------------------------------------------
@@ -144,3 +146,66 @@ def test_no_creds_file_load_is_noop(tmp_path):
     store = CredentialStore(tmp_path)
     store.load()  # no file exists — must not raise
     assert store.get("anything") is None
+
+
+# ---------------------------------------------------------------------------
+# PBKDF2 salt — per-install random salt + migration from the legacy fixed salt
+# ---------------------------------------------------------------------------
+
+
+def test_pbkdf2_salt_is_random_per_data_dir(tmp_path):
+    """Two installs with the same passphrase but different data dirs must not
+    derive the same key — the salt must not be a fixed, shared constant."""
+    dir_a = tmp_path / "install-a"
+    dir_b = tmp_path / "install-b"
+    store_a = CredentialStore(dir_a, secret_key="same-passphrase")
+    store_b = CredentialStore(dir_b, secret_key="same-passphrase")
+
+    salt_a = (dir_a / ".stratum_salt").read_bytes()
+    salt_b = (dir_b / ".stratum_salt").read_bytes()
+    assert salt_a != salt_b
+
+    store_a.set("aws", {"region": "us-east-1"})
+    enc = (dir_a / "credentials.enc").read_bytes()
+    # store_b's key (different salt) must not be able to decrypt store_a's file
+    import json
+
+    try:
+        json.loads(store_b._fernet.decrypt(enc))
+        raised = False
+    except InvalidToken:
+        raised = True
+    assert raised, "different salts must derive different keys"
+
+
+def test_legacy_fixed_salt_credentials_migrate_on_load(tmp_path):
+    """Credentials encrypted under the old fixed salt (pre-fix installs) must
+    still load, and get transparently re-encrypted under the new per-install
+    random salt so the legacy salt is no longer relied on afterwards."""
+    from stratum.api import integrations as integrations_mod
+
+    secret_key = "existing-install-passphrase"
+
+    # Simulate a pre-fix install: encrypt directly with the legacy fixed salt,
+    # no .stratum_salt file involved.
+    legacy_store = CredentialStore(tmp_path, secret_key=secret_key)
+    legacy_fernet = Fernet(legacy_store._derive_key(secret_key, integrations_mod._LEGACY_KDF_SALT))
+    (tmp_path / "credentials.enc").write_bytes(legacy_fernet.encrypt(b'{"aws": {"region": "us-east-1"}}'))
+    (tmp_path / ".stratum_salt").unlink()  # pre-fix installs never had this file
+
+    # New store (post-fix code) using the same passphrase should migrate on load.
+    store = CredentialStore(tmp_path, secret_key=secret_key)
+    store.load()
+    assert store.get("aws") == {"region": "us-east-1"}
+
+    # After migration, the file on disk must be re-encrypted under the new,
+    # per-install random salt — decryptable with the current store's key,
+    # and no longer with the legacy fixed-salt key.
+    reloaded_raw = (tmp_path / "credentials.enc").read_bytes()
+    assert store._fernet.decrypt(reloaded_raw)
+    try:
+        legacy_fernet.decrypt(reloaded_raw)
+        migrated = False
+    except InvalidToken:
+        migrated = True
+    assert migrated, "credentials must be re-encrypted under the new salt after migration"

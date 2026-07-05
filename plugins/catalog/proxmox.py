@@ -157,12 +157,15 @@ def _get_proxmox_client(creds: dict):
         from proxmoxer import ProxmoxAPI
     except ImportError as exc:
         raise RuntimeError("proxmoxer is not installed. Run: pip install 'stratum[proxmox]'") from exc
+    # Stored/submitted as a bool, or "true"/"false" strings from a form/JSON
+    # body — a bare `.get(..., False)` would treat the string "false" as truthy.
+    verify_ssl = str(creds.get("verify_ssl", False)).strip().lower() in ("true", "on", "1", "yes")
     return ProxmoxAPI(
         creds["host"],
         user=creds["user"],
         token_name=creds["token_name"],
         token_value=creds["token_value"],
-        verify_ssl=creds.get("verify_ssl", False),
+        verify_ssl=verify_ssl,
     )
 
 

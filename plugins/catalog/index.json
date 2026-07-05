@@ -85,7 +85,8 @@
         {"key": "node", "label": "Proxmox Node", "type": "text", "default": "pve"},
         {"key": "storage", "label": "Storage Pool", "type": "text", "default": "local-lvm"},
         {"key": "ssh_host", "label": "SSH Host for Ansible (IP or DNS of VM)", "type": "text"},
-        {"key": "ssh_user", "label": "SSH User in VM", "type": "text", "default": "root"}
+        {"key": "ssh_user", "label": "SSH User in VM", "type": "text", "default": "root"},
+        {"key": "verify_ssl", "label": "Verify TLS Certificate (leave unchecked for self-signed Proxmox certs)", "type": "checkbox", "default": false}
       ]
     }
   ]

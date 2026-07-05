@@ -70,7 +70,9 @@ def _get_proxmox(credentials: dict):
         raise ValueError("credentials.host is required for Proxmox")
 
     user = credentials.get("user", "root@pam")
-    verify_ssl = credentials.get("verify_ssl", False)
+    # Stored/submitted as a bool, or "true"/"false" strings from a form/JSON
+    # body — a bare `.get(..., False)` would treat the string "false" as truthy.
+    verify_ssl = str(credentials.get("verify_ssl", False)).strip().lower() in ("true", "on", "1", "yes")
 
     token_name = credentials.get("token_name", "")
     token_value = credentials.get("token_value", "")

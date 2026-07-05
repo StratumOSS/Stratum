@@ -6,6 +6,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 # fixtures from conftest: client, api_key
 
 
@@ -917,3 +919,38 @@ async def test_proxmox_helper_exception():
             }
         )
     assert "error" in result.lower() or "SSL error" in result.lower() or result
+
+
+@pytest.mark.parametrize(
+    ("stored_value", "expected"),
+    [
+        (False, False),
+        ("false", False),  # the historical coercion bug: a string "false" must not be truthy
+        ("", False),
+        (True, True),
+        ("true", True),
+        ("on", True),
+    ],
+)
+async def test_proxmox_helper_verify_ssl_coercion(stored_value, expected):
+    from stratum.api.integrations import _test_proxmox
+
+    mock_proxmox = MagicMock()
+    mock_proxmox.version.get.return_value = {"version": "8.1", "release": "1"}
+    mock_proxmoxer = MagicMock()
+    mock_proxmoxer.ProxmoxAPI.return_value = mock_proxmox
+
+    import sys
+
+    with patch.dict(sys.modules, {"proxmoxer": mock_proxmoxer}):
+        await _test_proxmox(
+            {
+                "host": "pve.example.com",
+                "user": "root@pam",
+                "token_name": "stratum",
+                "token_value": "tok-123",
+                "verify_ssl": stored_value,
+            }
+        )
+
+    assert mock_proxmoxer.ProxmoxAPI.call_args.kwargs["verify_ssl"] is expected

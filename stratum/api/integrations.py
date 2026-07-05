@@ -8,6 +8,7 @@ import base64
 import html
 import json
 import logging
+import secrets
 from pathlib import Path
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -25,8 +26,15 @@ _AWS_TEMPLATES = {
     "stratum-builder-role.yaml",
 }
 
-# KDF parameters — changing these invalidates existing encrypted files.
-_KDF_SALT = b"stratum-credential-store-v1"
+# KDF parameters.
+# _LEGACY_KDF_SALT was a fixed constant shared by every Stratum install that
+# set STRATUM_SECRET_KEY — since the salt is public (in the open-source repo),
+# a weak/guessable passphrase was vulnerable to a precomputed dictionary attack
+# that worked across every deployment, not just a per-install brute force.
+# Installs now get a random salt generated at data_dir/.stratum_salt on first
+# use; _LEGACY_KDF_SALT is kept only so CredentialStore.load() can migrate
+# credentials encrypted before this fix (see _init_fernet / load).
+_LEGACY_KDF_SALT = b"stratum-credential-store-v1"
 _KDF_ITERATIONS = 300_000
 
 
@@ -47,24 +55,43 @@ class CredentialStore:
         self._data_dir = data_dir
         self._creds_file = data_dir / "credentials.enc"
         self._key_file = data_dir / ".stratum_key"
+        self._salt_file = data_dir / ".stratum_salt"
         self._store: dict[str, dict] = {}
+        self._secret_key = secret_key
         self._fernet = self._init_fernet(secret_key)
 
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
 
+    def _get_or_create_salt(self) -> bytes:
+        """Return a random salt persisted at data_dir/.stratum_salt, generating
+        one on first use so each install derives a unique key from the same
+        STRATUM_SECRET_KEY passphrase (see _LEGACY_KDF_SALT comment above)."""
+        if self._salt_file.exists():
+            return self._salt_file.read_bytes()
+        salt = secrets.token_bytes(16)
+        self._salt_file.write_bytes(salt)
+        try:
+            self._salt_file.chmod(0o600)
+        except OSError:
+            pass
+        return salt
+
+    def _derive_key(self, secret_key: str, salt: bytes) -> bytes:
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=_KDF_ITERATIONS,
+        )
+        return base64.urlsafe_b64encode(kdf.derive(secret_key.encode()))
+
     def _init_fernet(self, secret_key: str | None) -> Fernet:
         self._data_dir.mkdir(parents=True, exist_ok=True)
 
         if secret_key:
-            kdf = PBKDF2HMAC(
-                algorithm=hashes.SHA256(),
-                length=32,
-                salt=_KDF_SALT,
-                iterations=_KDF_ITERATIONS,
-            )
-            key = base64.urlsafe_b64encode(kdf.derive(secret_key.encode()))
+            key = self._derive_key(secret_key, self._get_or_create_salt())
             logger.info("Credential store: using PBKDF2-derived key from STRATUM_SECRET_KEY")
         elif self._key_file.exists():
             key = self._key_file.read_bytes().strip()
@@ -76,6 +103,13 @@ class CredentialStore:
             logger.info("Credential store: generated new key at %s", self._key_file)
 
         return Fernet(key)
+
+    def _legacy_fernet(self) -> Fernet | None:
+        """Fernet derived with the pre-fix fixed salt, used only to migrate
+        credentials encrypted before per-install random salts existed."""
+        if not self._secret_key:
+            return None
+        return Fernet(self._derive_key(self._secret_key, _LEGACY_KDF_SALT))
 
     def _persist(self) -> None:
         """Encrypt and write credential store to disk.
@@ -110,8 +144,20 @@ class CredentialStore:
             return
         try:
             encrypted = self._creds_file.read_bytes()
-            self._store = json.loads(self._fernet.decrypt(encrypted))
-            logger.info("Loaded persisted credentials for: %s", list(self._store.keys()))
+            try:
+                self._store = json.loads(self._fernet.decrypt(encrypted))
+                logger.info("Loaded persisted credentials for: %s", list(self._store.keys()))
+            except InvalidToken:
+                legacy = self._legacy_fernet()
+                if legacy is None:
+                    raise
+                self._store = json.loads(legacy.decrypt(encrypted))
+                logger.warning(
+                    "Credential store: decrypted with the pre-migration fixed-salt key — "
+                    "re-encrypting under the new per-install random salt."
+                )
+                self._persist()
+                logger.info("Credential store migrated to per-install salt for: %s", list(self._store.keys()))
         except InvalidToken:
             logger.warning(
                 "Credential file exists but could not be decrypted — "
@@ -178,22 +224,22 @@ def _aws_stack_import_html(creds: dict, outputs: dict) -> str:
         f'<input id="aws-role-arn" hx-swap-oob="true" type="text" name="role_arn" value="{role_arn}" '
         'placeholder="arn:aws:iam::123456789012:role/StratumBuilderRole" '
         'class="w-full bg-slate-900/50 border border-slate-700/80 rounded-lg px-4 py-2.5 text-sm text-white '
-        'placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 '
+        "placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 "
         'transition-all font-mono" />'
         f'<input id="aws-external-id" hx-swap-oob="true" type="text" name="external_id" value="{external_id}" '
         'placeholder="stratum-your-company-or-random-id" '
         'class="w-full bg-slate-900/50 border border-slate-700/80 rounded-lg px-4 py-2.5 text-sm text-white '
-        'placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 '
+        "placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 "
         'transition-all font-mono" />'
         f'<input id="aws-region" hx-swap-oob="true" type="text" name="region" value="{region}" '
         'placeholder="us-east-1" '
         'class="w-full bg-slate-900/50 border border-slate-700/80 rounded-lg px-4 py-2.5 text-sm text-white '
-        'placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 '
+        "placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 "
         'transition-all font-mono" />'
         f'<input id="aws-iam-profile-name" hx-swap-oob="true" type="text" name="iam_profile_name" value="{iam_profile_name}" '
         'placeholder="StratumInstanceProfile" '
         'class="w-full bg-slate-900/50 border border-slate-700/80 rounded-lg px-4 py-2.5 text-sm text-white '
-        'placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 '
+        "placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 "
         'transition-all font-mono" />'
     )
 
@@ -253,6 +299,7 @@ async def import_aws_stack_outputs(request: Request) -> str:
         return _err_html(f"AWS Error: {exc}")
     except Exception as exc:
         return _err_html(str(exc))
+
 
 _SAVED_HTML = (
     '<div class="rounded-xl border border-emerald-800/50 bg-emerald-950/20 p-4 space-y-3">'
@@ -518,12 +565,16 @@ async def _test_proxmox(creds: dict) -> str:
     except ImportError:
         return _err_html("proxmoxer not installed. Install stratum[proxmox].")
     try:
+        # Form submissions send "true" (checked) or omit the key (unchecked) —
+        # see the checkbox field template — so this must not treat every
+        # non-empty string (e.g. a stray "false") as truthy.
+        verify_ssl = str(creds.get("verify_ssl", False)).strip().lower() in ("true", "on", "1", "yes")
         proxmox = ProxmoxAPI(
             host=creds["host"],
             user=creds["user"],
             token_name=creds["token_name"],
             token_value=creds["token_value"],
-            verify_ssl=False,
+            verify_ssl=verify_ssl,
         )
         version_info = proxmox.version.get()
         ver = version_info.get("version", "unknown")

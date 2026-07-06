@@ -4,7 +4,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-0.3.0-brightgreen)]()
+[![Version](https://img.shields.io/badge/version-0.5.1-brightgreen)](CHANGELOG.md)
 [![CI](https://github.com/rrskris/Stratum/actions/workflows/ci.yml/badge.svg)](https://github.com/rrskris/Stratum/actions/workflows/ci.yml)
 
 Stratum is a self-hosted DevSecOps platform that turns a declarative YAML blueprint into a fully-hardened, CIS/STIG-benchmarked golden image — automatically, on any cloud.

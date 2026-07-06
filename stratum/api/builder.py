@@ -648,7 +648,8 @@ def _build_profile_from_wizard(form) -> build_service.ComplianceProfile:
 
     # SCAP fields from catalog
     benchmark = os_data.get("scap_benchmark", "")
-    profile_suffix = "cis_level2_server" if tier == "l2" else "cis_level1_server"
+    cis_suffixes = os_data.get("cis_profile_suffixes", {"l1": "cis_level1_server", "l2": "cis_level2_server"})
+    profile_suffix = cis_suffixes.get(tier, cis_suffixes.get("l1", "cis_level1_server"))
     scap_profile = os_data.get("scap_profile_prefix", "") + profile_suffix
     datastream = os_data.get("scap_datastream", "")
 

@@ -23,6 +23,7 @@ OS_CATALOG: dict[str, dict] = {
         },
         "scap_benchmark": "xccdf_org.ssgproject.content_benchmark_AMAZON_LINUX_2023",
         "scap_profile_prefix": "xccdf_org.ssgproject.content_profile_",
+        "cis_profile_suffixes": {"l1": "cis_server_l1", "l2": "cis"},
         "scap_datastream": "/usr/share/xml/scap/ssg/content/ssg-al2023-ds.xml",
         "supported_tiers": ["cis-l1", "cis-l2"],
         "selinux": True,
@@ -50,6 +51,7 @@ OS_CATALOG: dict[str, dict] = {
         },
         "scap_benchmark": "xccdf_org.ssgproject.content_benchmark_UBUNTU2204",
         "scap_profile_prefix": "xccdf_org.ssgproject.content_profile_",
+        "cis_profile_suffixes": {"l1": "cis_level1_server", "l2": "cis_level2_server"},
         "scap_datastream": "/usr/share/xml/scap/ssg/content/ssg-ubuntu2204-ds.xml",
         "supported_tiers": ["cis-l1", "cis-l2"],
         "selinux": False,
@@ -77,6 +79,7 @@ OS_CATALOG: dict[str, dict] = {
         },
         "scap_benchmark": "xccdf_org.ssgproject.content_benchmark_UBUNTU2404",
         "scap_profile_prefix": "xccdf_org.ssgproject.content_profile_",
+        "cis_profile_suffixes": {"l1": "cis_level1_server", "l2": "cis_level2_server"},
         "scap_datastream": "/usr/share/xml/scap/ssg/content/ssg-ubuntu2404-ds.xml",
         "supported_tiers": ["cis-l1", "cis-l2"],
         "selinux": False,
@@ -102,8 +105,9 @@ OS_CATALOG: dict[str, dict] = {
             "owner": "679593333241",  # Rocky Linux Foundation
             "name_pattern": "Rocky-9-EC2-Base-9.*-*.x86_64-*",
         },
-        "scap_benchmark": "xccdf_org.ssgproject.content_benchmark_RHEL9",
+        "scap_benchmark": "xccdf_org.ssgproject.content_benchmark_RHEL-9",
         "scap_profile_prefix": "xccdf_org.ssgproject.content_profile_",
+        "cis_profile_suffixes": {"l1": "cis_server_l1", "l2": "cis"},
         "scap_datastream": "/usr/share/xml/scap/ssg/content/ssg-rl9-ds.xml",
         "supported_tiers": ["cis-l1", "cis-l2", "stig"],
         "selinux": True,
@@ -127,8 +131,9 @@ OS_CATALOG: dict[str, dict] = {
             "owner": "309956199498",  # Red Hat
             "name_pattern": "RHEL-9.*_HVM-*-x86_64-*-Hourly2-GP3",
         },
-        "scap_benchmark": "xccdf_org.ssgproject.content_benchmark_RHEL9",
+        "scap_benchmark": "xccdf_org.ssgproject.content_benchmark_RHEL-9",
         "scap_profile_prefix": "xccdf_org.ssgproject.content_profile_",
+        "cis_profile_suffixes": {"l1": "cis_server_l1", "l2": "cis"},
         "scap_datastream": "/usr/share/xml/scap/ssg/content/ssg-rhel9-ds.xml",
         "supported_tiers": ["cis-l1", "cis-l2", "stig"],
         "selinux": True,
@@ -136,6 +141,30 @@ OS_CATALOG: dict[str, dict] = {
             "cis-l1": "ansible-lockdown.rhel9_cis",
             "cis-l2": "ansible-lockdown.rhel9_cis",
             "stig": "ansible-lockdown.rhel9_stig",
+        },
+    },
+    "alma9": {
+        "display": "AlmaLinux 9",
+        "icon": "🅰️",
+        "providers": ["aws", "azure"],
+        "min_root_gb": 20,
+        "default_base_image": {
+            "aws": "ami-0f673487d7e5f89ca",  # fallback us-east-1; resolved at build time
+            "azure": "alma9",
+        },
+        "aws_image_query": {
+            "owner": "764336703387",  # AlmaLinux OS Foundation
+            "name_pattern": "AlmaLinux OS 9*x86_64*",
+        },
+        "scap_benchmark": "xccdf_org.ssgproject.content_benchmark_RHEL-9",
+        "scap_profile_prefix": "xccdf_org.ssgproject.content_profile_",
+        "cis_profile_suffixes": {"l1": "cis_server_l1", "l2": "cis"},
+        "scap_datastream": "/usr/share/xml/scap/ssg/content/ssg-rhel9-ds.xml",
+        "supported_tiers": ["cis-l1", "cis-l2"],
+        "selinux": True,
+        "lockdown_roles": {
+            "cis-l1": "ansible-lockdown.rhel9_cis",
+            "cis-l2": "ansible-lockdown.rhel9_cis",
         },
     },
     "debian12": {
@@ -157,11 +186,13 @@ OS_CATALOG: dict[str, dict] = {
         },
         "scap_benchmark": "xccdf_org.ssgproject.content_benchmark_DEBIAN12",
         "scap_profile_prefix": "xccdf_org.ssgproject.content_profile_",
+        "cis_profile_suffixes": {"l1": "cis_level1_server", "l2": "cis_level2_server"},
         "scap_datastream": "/usr/share/xml/scap/ssg/content/ssg-debian12-ds.xml",
-        "supported_tiers": ["cis-l1"],
+        "supported_tiers": ["cis-l1", "cis-l2"],
         "selinux": False,
         "lockdown_roles": {
             "cis-l1": "ansible-lockdown.deb12_cis",
+            "cis-l2": "ansible-lockdown.deb12_cis",
         },
     },
 }
@@ -1772,11 +1803,16 @@ CIS_CONTROLS: dict[str, dict[str, list[dict]]] = {
         "cis-l2": _RHEL9_CIS_L2,
         "stig": _RHEL9_STIG,
     },
+    "alma9": {
+        "cis-l1": _RHEL9_CIS_L1,
+        "cis-l2": _RHEL9_CIS_L2,
+    },
     "amazon-linux-2023": {
         "cis-l1": _RHEL9_CIS_L1,
         "cis-l2": _RHEL9_CIS_L2,
     },
     "debian12": {
         "cis-l1": _UBUNTU22_CIS_L1,
+        "cis-l2": _UBUNTU22_CIS_L2,
     },
 }

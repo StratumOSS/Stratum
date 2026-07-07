@@ -49,3 +49,9 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Claude Code / AI assistant local files — never commit
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.mcp.json

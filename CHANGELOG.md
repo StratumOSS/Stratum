@@ -6,6 +6,40 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- Project moved from `github.com/rrskris/Stratum` to a dedicated org,
+  `github.com/StratumOSS/Stratum` (old URL redirects automatically).
+- PyPI distribution name is now `stratumoss` (the plain `stratum` name is
+  an unrelated, long-abandoned package). The importable module is
+  unchanged — it's still `import stratum`.
+
+### Added
+
+- Branch protection on `main`: required CI checks, one required review,
+  stale-review dismissal, no force-pushes.
+- DCO enforcement (`.github/workflows/dco.yml`) — every PR commit must
+  carry a `Signed-off-by` line.
+- `CODEOWNERS` and an expanded PR template checklist.
+- Seven curated `good first issue`/`help wanted` issues covering CIS L2
+  blueprints (Ubuntu 22.04, Rocky/Alma 9, Debian 12), first blueprints
+  for Ubuntu 24.04, Blueprint Studio validation feedback, a light theme
+  toggle, and a Rocky 9 STIG blueprint.
+
+### Fixed
+
+- Playwright UI tests (`tests/ui/`) errored instead of skipping on any
+  machine without browsers installed (e.g. CI), because the opt-in
+  guard was a function-scoped autouse fixture but pytest-playwright's
+  `browser` fixture is session-scoped and instantiated first. Replaced
+  with a collection-time `skipif` marker. This had been failing
+  `Tests (pytest)` on `main` silently before branch protection made it
+  a hard gate.
+
+---
+
 ## [0.5.1] — 2026-07-05
 
 ### Fixed

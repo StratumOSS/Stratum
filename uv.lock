@@ -1542,7 +1542,7 @@ wheels = [
 ]
 
 [[package]]
-name = "stratum"
+name = "stratumoss"
 version = "0.5.1"
 source = { editable = "." }
 dependencies = [
@@ -1660,8 +1660,8 @@ requires-dist = [
     { name = "requests", marker = "extra == 'digitalocean'", specifier = ">=2.31.0" },
     { name = "requests", marker = "extra == 'proxmox'", specifier = ">=2.31.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4.0" },
-    { name = "stratum", extras = ["aws", "gcp", "azure", "linode", "digitalocean", "proxmox"], marker = "extra == 'all-providers'" },
-    { name = "stratum", extras = ["llm-openai", "llm-bedrock"], marker = "extra == 'llm-all'" },
+    { name = "stratumoss", extras = ["aws", "gcp", "azure", "linode", "digitalocean", "proxmox"], marker = "extra == 'all-providers'" },
+    { name = "stratumoss", extras = ["llm-openai", "llm-bedrock"], marker = "extra == 'llm-all'" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.29.0" },
 ]
 provides-extras = ["aws", "gcp", "azure", "linode", "digitalocean", "proxmox", "all-providers", "llm-openai", "llm-bedrock", "llm-all", "dev"]

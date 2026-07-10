@@ -5,7 +5,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![Version](https://img.shields.io/badge/version-0.5.1-brightgreen)](CHANGELOG.md)
-[![CI](https://github.com/rrskris/Stratum/actions/workflows/ci.yml/badge.svg)](https://github.com/rrskris/Stratum/actions/workflows/ci.yml)
+[![CI](https://github.com/StratumOSS/Stratum/actions/workflows/ci.yml/badge.svg)](https://github.com/StratumOSS/Stratum/actions/workflows/ci.yml)
 
 Stratum is a self-hosted DevSecOps platform that turns a declarative YAML blueprint into a fully-hardened, CIS/STIG-benchmarked golden image — automatically, on any cloud.
 
@@ -89,7 +89,7 @@ HardeningBlueprint (YAML)  ──or──  5-Step Guided Wizard
 ### Docker (recommended)
 
 ```bash
-git clone https://github.com/rrskris/Stratum.git
+git clone https://github.com/StratumOSS/Stratum.git
 cd Stratum
 docker compose up
 ```
@@ -143,7 +143,7 @@ The templates are intentionally readable so customers can evaluate every permiss
 **Prerequisites:** Python 3.11+, [uv](https://docs.astral.sh/uv/), Ansible, OpenSCAP. Building images locally with the `kvm` provider additionally needs `qemu-system-x86`, `qemu-utils`, and either `cloud-image-utils` (`cloud-localds`) or `genisoimage` — system packages, not pip installs.
 
 ```bash
-git clone https://github.com/rrskris/Stratum.git
+git clone https://github.com/StratumOSS/Stratum.git
 cd Stratum
 
 # Install all provider SDKs + dev tools

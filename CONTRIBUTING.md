@@ -30,7 +30,7 @@ opening a public issue.
 ## Getting Started
 
 ```bash
-git clone https://github.com/rrskris/Stratum.git
+git clone https://github.com/StratumOSS/Stratum.git
 cd stratum
 
 # Install with all provider extras

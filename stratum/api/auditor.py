@@ -312,7 +312,7 @@ def _to_sarif(job: audit_service.AuditJob) -> dict:
                     "driver": {
                         "name": "Stratum Compliance Scanner",
                         "version": "0.1.1",
-                        "informationUri": "https://github.com/rrskris/Stratum",
+                        "informationUri": "https://github.com/StratumOSS/Stratum",
                         "rules": rules,
                     }
                 },

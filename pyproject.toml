@@ -61,10 +61,10 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/rrskris/Stratum"
-Homepage = "https://github.com/rrskris/Stratum"
-"Bug Tracker" = "https://github.com/rrskris/Stratum/issues"
-Changelog = "https://github.com/rrskris/Stratum/blob/main/CHANGELOG.md"
+Repository = "https://github.com/StratumOSS/Stratum"
+Homepage = "https://github.com/StratumOSS/Stratum"
+"Bug Tracker" = "https://github.com/StratumOSS/Stratum/issues"
+Changelog = "https://github.com/StratumOSS/Stratum/blob/main/CHANGELOG.md"
 
 [project.entry-points."stratum.providers"]
 # Register pip-installed providers here, e.g.:

@@ -20,7 +20,7 @@ Before you start, confirm the following:
 ## Step 0 — Install and Start Stratum
 
 ```bash
-git clone https://github.com/rrskris/Stratum.git
+git clone https://github.com/StratumOSS/Stratum.git
 cd Stratum
 ```
 

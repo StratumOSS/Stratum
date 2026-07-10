@@ -67,7 +67,7 @@ All four were found by actually running a full build end-to-end against a local 
 
 - Public-facing docs, the README, and generated SARIF compliance reports no
   longer reference the private development repository — all point at
-  `github.com/rrskris/Stratum`.
+  `github.com/StratumOSS/Stratum`.
 - `POST /api/pipeline/build` no longer 500s when a `region` override is
   supplied (`TargetSpec` has no `region` field; the value is now recorded on
   the job for display instead of an invalid attribute assignment).

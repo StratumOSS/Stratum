@@ -11,7 +11,7 @@
 <!-- How did you verify this? -->
 - [ ] `uv run pytest` passes locally
 - [ ] `uv run ruff check .` and `uv run ruff format --check .` pass
-- [ ] Added/updated tests for the change (see `docs/test_plan.md` for the
+- [ ] Added/updated tests for the change (see `docs/dev/test_plan.md` for the
       project's TDD conventions)
 - [ ] If this touches a cloud provider: ran against a real provider, or
       explained why that isn't practical for this change

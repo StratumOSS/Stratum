@@ -8,6 +8,14 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- README restructured as a ≤200-line landing page; reference content moved
+  into `docs/` (new: getting-started, blueprint-guide, plugin-guide,
+  configuration, architecture, and a docs index). Version badge is now the
+  live PyPI badge; Quick Start covers Compose, the published Docker image,
+  PyPI, and source. `docs/test_plan.md` moved to `docs/dev/`.
+
 ## [0.5.2] — 2026-07-11
 
 First release published to PyPI (`pip install stratumoss`) with a

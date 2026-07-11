@@ -13,11 +13,12 @@ from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 
 from stratum.config import settings
+from stratum.paths import TEMPLATES_DIR
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/plugins", tags=["plugins"])
-templates = Jinja2Templates(directory="stratum/templates")
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 # ---------------------------------------------------------------------------

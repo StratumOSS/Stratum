@@ -14,8 +14,9 @@ from pydantic import BaseModel
 from stratum.config import settings
 from stratum.core import auditor as audit_service
 from stratum.core.blueprint import list_profiles, load_profile
+from stratum.paths import TEMPLATES_DIR
 
-_templates = Jinja2Templates(directory="stratum/templates")
+_templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 router = APIRouter(prefix="/api/auditor", tags=["auditor"])
 

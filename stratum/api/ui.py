@@ -13,10 +13,11 @@ from stratum.config import settings
 from stratum.core.auditor import list_audits
 from stratum.core.blueprint import list_profiles, load_profile
 from stratum.core.builder import list_jobs
+from stratum.paths import TEMPLATES_DIR
 from stratum.plugins.registry import registry
 
 router = APIRouter()
-templates = Jinja2Templates(directory="stratum/templates")
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 def _toyaml(value) -> str:
@@ -62,7 +63,6 @@ async def integrations_page(request: Request):
 @router.get("/integrations/{provider_name}/form", response_class=HTMLResponse)
 async def integrations_provider_form(request: Request, provider_name: str):
     import json
-    import os
 
     from stratum.api.integrations import get_credentials
     from stratum.config import settings
@@ -70,8 +70,8 @@ async def integrations_provider_form(request: Request, provider_name: str):
     creds = get_credentials(provider_name) or {}
 
     # Check if a specific partial exists
-    partial_path = f"stratum/templates/integrations/partials/{provider_name}.html"
-    if os.path.exists(partial_path):
+    partial_path = TEMPLATES_DIR / "integrations" / "partials" / f"{provider_name}.html"
+    if partial_path.exists():
         template_name = f"integrations/partials/{provider_name}.html"
     else:
         template_name = "integrations/partials/generic.html"

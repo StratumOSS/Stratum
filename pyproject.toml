@@ -99,6 +99,14 @@ ignore = ["E501", "B008", "B904", "UP042"]
 [tool.hatch.build.targets.wheel]
 packages = ["stratum"]
 
+# Read-only data for pip installs: built-in blueprint templates and the
+# provider catalog live at the repo root, so they must be mapped into the
+# package. Settings falls back to stratum/_bundled/ when the CWD-relative
+# dirs are missing (see stratum/config.py).
+[tool.hatch.build.targets.wheel.force-include]
+"profiles/templates" = "stratum/_bundled/profiles/templates"
+"plugins/catalog" = "stratum/_bundled/plugins/catalog"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"

@@ -15,9 +15,10 @@ from pydantic import ValidationError
 
 from stratum.config import settings
 from stratum.core.blueprint import ComplianceProfile, list_profiles, load_profile
+from stratum.paths import TEMPLATES_DIR
 
 router = APIRouter(prefix="/api/blueprints", tags=["blueprints"])
-templates = Jinja2Templates(directory="stratum/templates")
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 # Hand-authored blueprint YAML is small; this bounds both plain memory use and,
 # as a cheap first line of defense, the input size available to a YAML-anchor

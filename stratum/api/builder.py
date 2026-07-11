@@ -591,7 +591,9 @@ async def job_status_partial(request: Request, job_id: str):
     """HTML partial for HTMX polling — renders job_status.html fragment."""
     from fastapi.templating import Jinja2Templates
 
-    _templates = Jinja2Templates(directory="stratum/templates")
+    from stratum.paths import TEMPLATES_DIR
+
+    _templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
     job = build_service.get_job(job_id)
     if job is None:
         return HTMLResponse(

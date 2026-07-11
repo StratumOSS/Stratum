@@ -22,6 +22,7 @@ from stratum.api.integrations import credential_store
 from stratum.config import settings
 from stratum.core.auth import require_admin, require_admin_or_key
 from stratum.core.registry import RegistrySource, init_registry
+from stratum.paths import STATIC_DIR
 from stratum.plugins.registry import registry
 
 logging.basicConfig(
@@ -97,9 +98,8 @@ app = FastAPI(
 )
 
 # Static files
-_static_dir = Path("stratum/static")
-if _static_dir.exists():
-    app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Routers
 # `pipeline` enforces its own per-route API-key check (CI/automation surface).

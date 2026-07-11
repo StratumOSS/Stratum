@@ -137,8 +137,9 @@ class ProfileRegistry:
                         self._profiles[profile.metadata.name] = profile
                         synced.append(profile.metadata.name)
                         if self._cache_dir is not None:
-                            self._cache_dir.mkdir(parents=True, exist_ok=True)
-                            (self._cache_dir / filename).write_text(yaml_resp.text)
+                            cache_path = self._cache_dir / filename
+                            cache_path.parent.mkdir(parents=True, exist_ok=True)
+                            cache_path.write_text(yaml_resp.text)
                 except Exception as exc:
                     logger.warning("Registry: failed to sync %s from %s: %s", filename, base, exc)
         return synced

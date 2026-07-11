@@ -138,6 +138,19 @@ Azure and GCP follow the same model: a cloud administrator reviews and applies t
 
 The templates are intentionally readable so customers can evaluate every permission and apply the same role manually if they prefer.
 
+### Install from PyPI
+
+```bash
+pip install "stratumoss[all-providers]"   # or pick extras: aws, gcp, azure, linode, digitalocean, proxmox
+
+uvicorn stratum.main:app --port 8000
+```
+
+Built-in blueprint templates and the provider catalog ship inside the package,
+so this works from any directory. Runtime state (`data/`, `profiles/user/`,
+installed provider plugins) is created in the directory you launch from.
+Ansible and OpenSCAP are still required on the host for hardening and scanning.
+
 ### Local Development
 
 **Prerequisites:** Python 3.11+, [uv](https://docs.astral.sh/uv/), Ansible, OpenSCAP. Building images locally with the `kvm` provider additionally needs `qemu-system-x86`, `qemu-utils`, and either `cloud-image-utils` (`cloud-localds`) or `genisoimage` — system packages, not pip installs.

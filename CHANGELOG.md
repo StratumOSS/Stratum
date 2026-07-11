@@ -8,8 +8,41 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.2] — 2026-07-11
+
+First release published to PyPI (`pip install stratumoss`).
+
+### Fixed
+
+**`pip install stratumoss` now works from any directory — previously the app only ran from a repo checkout**
+
+- Jinja2 templates and static assets were loaded from CWD-relative paths
+  (`stratum/templates`, `stratum/static`), so every UI page 500'd with
+  `TemplateNotFound` and CSS/JS never mounted unless the server was started
+  from the repo root. All paths are now anchored to the installed package
+  (`stratum/paths.py`).
+- Built-in blueprint templates (`profiles/templates/`) and the provider
+  catalog (`plugins/catalog/`) now ship inside the wheel; `Settings` falls
+  back to the bundled copies when the CWD-relative directories are missing.
+  Explicitly configured dirs (env var or kwarg) are never overridden.
+- Community registry sync failed to cache blueprints with nested index
+  paths (e.g. `rocky/9/cis-l1-aws.yaml`) because parent directories were
+  never created.
+- Playwright UI tests (`tests/ui/`) errored instead of skipping on any
+  machine without browsers installed (e.g. CI), because the opt-in
+  guard was a function-scoped autouse fixture but pytest-playwright's
+  `browser` fixture is session-scoped and instantiated first. Replaced
+  with a collection-time `skipif` marker. This had been failing
+  `Tests (pytest)` on `main` silently before branch protection made it
+  a hard gate.
+
 ### Changed
 
+- Default `registry_url` now points at the real community blueprint
+  library (`StratumOSS/Stratum` `blueprints/`) instead of the
+  never-created `stratum-community/profiles` repo.
+- Releases are published to PyPI via GitHub Actions trusted publishing
+  on version tags (`.github/workflows/release.yml`).
 - Project moved from `github.com/rrskris/Stratum` to a dedicated org,
   `github.com/StratumOSS/Stratum` (old URL redirects automatically).
 - PyPI distribution name is now `stratumoss` (the plain `stratum` name is
@@ -27,16 +60,6 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   blueprints (Ubuntu 22.04, Rocky/Alma 9, Debian 12), first blueprints
   for Ubuntu 24.04, Blueprint Studio validation feedback, a light theme
   toggle, and a Rocky 9 STIG blueprint.
-
-### Fixed
-
-- Playwright UI tests (`tests/ui/`) errored instead of skipping on any
-  machine without browsers installed (e.g. CI), because the opt-in
-  guard was a function-scoped autouse fixture but pytest-playwright's
-  `browser` fixture is session-scoped and instantiated first. Replaced
-  with a collection-time `skipif` marker. This had been failing
-  `Tests (pytest)` on `main` silently before branch protection made it
-  a hard gate.
 
 ---
 

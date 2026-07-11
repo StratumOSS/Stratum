@@ -65,6 +65,8 @@ Repository = "https://github.com/StratumOSS/Stratum"
 Homepage = "https://github.com/StratumOSS/Stratum"
 "Bug Tracker" = "https://github.com/StratumOSS/Stratum/issues"
 Changelog = "https://github.com/StratumOSS/Stratum/blob/main/CHANGELOG.md"
+Blog = "https://linuxcent.com"
+LinkedIn = "https://www.linkedin.com/in/vamshikrishnasanthapuri/"
 
 [project.entry-points."stratum.providers"]
 # Register pip-installed providers here, e.g.:

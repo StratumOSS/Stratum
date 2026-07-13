@@ -115,7 +115,7 @@ async def upload_blueprint(request: Request, file: UploadFile) -> dict:
 
     try:
         profile = ComplianceProfile.model_validate(data)
-    except (ValidationError, Exception) as exc:
+    except ValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
 
     user_dir = settings.user_profiles_dir
@@ -146,7 +146,7 @@ async def validate_blueprint(request: Request) -> dict:
     try:
         profile = ComplianceProfile.model_validate(data)
         return {"valid": True, "name": profile.metadata.name}
-    except (ValidationError, Exception) as exc:
+    except ValidationError as exc:
         return {"valid": False, "errors": [str(exc)]}
 
 

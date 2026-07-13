@@ -72,15 +72,26 @@ def _err(id, code, message):
 # ---------------------------------------------------------------------------
 
 
-def test_connection(params: dict) -> dict:
-    """Verify the host has everything needed to boot a local QEMU VM."""
+def _require_binaries() -> None:
+    """Fail fast, with install-level specifics, if the host can't run a build."""
     import shutil as _shutil
 
     missing = [b for b in ("qemu-system-x86_64", "qemu-img") if _shutil.which(b) is None]
     if missing:
-        raise RuntimeError(f"Missing required binaries on PATH: {missing}")
+        raise RuntimeError(
+            f"Missing required binaries on PATH: {missing} — install qemu-system-x86 and qemu-utils "
+            "(apt) or qemu-kvm and qemu-img (dnf)"
+        )
     if _shutil.which("cloud-localds") is None and _shutil.which("genisoimage") is None:
-        raise RuntimeError("Neither 'cloud-localds' nor 'genisoimage' is on PATH — cannot build a cloud-init seed ISO")
+        raise RuntimeError(
+            "Neither 'cloud-localds' nor 'genisoimage' is on PATH — cannot build a cloud-init seed ISO. "
+            "Install cloud-image-utils (apt) or genisoimage (dnf)"
+        )
+
+
+def test_connection(params: dict) -> dict:
+    """Verify the host has everything needed to boot a local QEMU VM."""
+    _require_binaries()
 
     kvm_ok = qemu.kvm_available()
     return {
@@ -107,6 +118,7 @@ def execute_build(params: dict) -> dict:
         output_format   — "qcow2" (default) or "raw"
         credentials.memory_mb / credentials.cpus — guest resources
     """
+    _require_binaries()
     credentials = params.get("credentials", {}) or {}
     os_name = params.get("os", "ubuntu22.04")
     base_image_ref = params.get("base_image", "") or os_name

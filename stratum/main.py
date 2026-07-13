@@ -17,11 +17,13 @@ from stratum.api import api_keys as api_keys_api
 from stratum.api import auditor, blueprints, builder, integrations, plugins, ui
 from stratum.api import pipeline as pipeline_api
 from stratum.api import registry as registry_api
+from stratum.api import system as system_api
 from stratum.api import webhooks as webhooks_api
 from stratum.api.integrations import credential_store
 from stratum.config import settings
 from stratum.core.auth import require_admin, require_admin_or_key
 from stratum.core.registry import RegistrySource, init_registry
+from stratum.core.sysdeps import check_system_deps
 from stratum.paths import STATIC_DIR
 from stratum.plugins.registry import registry
 
@@ -115,6 +117,7 @@ app.include_router(builder.router, dependencies=_auth)
 app.include_router(auditor.router, dependencies=_auth)
 app.include_router(integrations.router, dependencies=_admin_only)
 app.include_router(registry_api.router, dependencies=_auth)
+app.include_router(system_api.router, dependencies=_auth)
 app.include_router(plugins.router, dependencies=_auth)
 app.include_router(agent_api.router, dependencies=_auth)
 app.include_router(pipeline_api.router)
@@ -123,5 +126,38 @@ app.include_router(api_keys_api.router, dependencies=_admin_only)
 
 
 @app.get("/health")
-async def health() -> dict:
-    return {"status": "ok", "providers": registry.names()}
+async def health(deep: bool = False) -> dict:
+    """Shallow liveness by default; ``?deep=1`` adds the system-dependency report."""
+    body: dict = {"status": "ok", "providers": registry.names()}
+    if deep:
+        body["system_deps"] = check_system_deps()
+    return body
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request, exc):
+    """Last-resort handler: never leak internals, always leave a correlatable trail.
+
+    The error_id printed to the client appears verbatim in the server log next
+    to the full traceback, so a user pasting it into a bug report is enough to
+    find the cause.
+    """
+    import uuid
+
+    from fastapi.responses import HTMLResponse as _HTMLResponse
+    from fastapi.responses import JSONResponse as _JSONResponse
+
+    error_id = uuid.uuid4().hex[:8]
+    logger.exception("Unhandled error %s on %s %s", error_id, request.method, request.url.path)
+    if request.headers.get("hx-request"):
+        return _HTMLResponse(
+            content=(
+                f'<div class="bg-rose-950/40 border border-rose-800/60 rounded-lg px-4 py-3 text-sm text-rose-200">'
+                f"Internal error — check the server log for error_id {error_id}</div>"
+            ),
+            status_code=500,
+        )
+    return _JSONResponse(
+        status_code=500,
+        content={"detail": "Internal error — see server log", "error_id": error_id},
+    )

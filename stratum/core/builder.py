@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import logging
+import shutil
 import subprocess
 import uuid
 from dataclasses import dataclass, field
@@ -192,6 +193,11 @@ def _run_prehard_ansible(playbook_path: Path, instance_id: str) -> None:
     Assumes ``ansible-playbook`` is on PATH and the provider has set up SSH
     access (key + inventory) as part of ``provision()``.
     """
+    if shutil.which("ansible-playbook") is None:
+        raise RuntimeError(
+            "ansible-playbook not found on PATH — hardening cannot run. "
+            "Install Ansible: apt install ansible | dnf install ansible | pip install ansible-core"
+        )
     cmd = [
         "ansible-playbook",
         "-i",

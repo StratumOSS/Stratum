@@ -10,6 +10,22 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto space-y-8">
+  {% if missing_deps %}
+  <div data-testid="missing-deps-banner" class="bg-amber-950/40 border border-amber-700/60 rounded-xl px-5 py-4">
+    <div class="flex items-center gap-2 mb-2">
+      <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 5c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"/></svg>
+      <span class="text-sm font-semibold text-amber-300">{{ missing_deps | length }} system tool{{ 's' if missing_deps | length != 1 }} missing on this host — some builds or scans will fail</span>
+    </div>
+    <ul class="space-y-1 ml-6">
+      {% for dep in missing_deps %}
+      <li class="text-xs text-amber-200/90">
+        <span class="font-mono text-amber-100">{{ dep.name }}</span> — needed for {{ dep.needed_for }}.
+        Install: <span class="font-mono">{{ dep.install_hint }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
   <div class="flex items-end justify-between">
     <div>
       <h1 class="text-3xl font-bold text-white tracking-tight">Overview</h1>

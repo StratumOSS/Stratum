@@ -8,6 +8,31 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **System-dependency diagnostics**: `GET /health?deep=1` and
+  `GET /api/system/deps` report each required host tool (ansible, ssh,
+  oscap, qemu, cloud-localds/genisoimage) with presence, path, what it's
+  needed for, and an install hint; the dashboard shows a banner when
+  something a build/scan needs is missing (`stratum/core/sysdeps.py`).
+- Global exception handler: unhandled errors now return a structured
+  500 with a short `error_id` that appears next to the full traceback
+  in the server log — no internals leak, and bug reports are
+  correlatable. HTMX requests get an inline error fragment instead.
+
+### Fixed
+
+- Missing host tools now fail fast with actionable messages instead of
+  mid-build subprocess noise: kvm builds preflight their binaries at
+  start (previously only "Test Connection" checked), and a missing
+  `ansible-playbook` raises an install-hint error instead of a raw
+  `FileNotFoundError`.
+- The Builder job page now shows a dedicated "Failure Reason" panel
+  (`job.error`) on failed builds — previously the reason was only
+  buried in the log stream (the Auditor already did this right).
+- Blueprint upload/validate no longer swallow unexpected internal
+  errors as 422 "validation" responses; they reach the global handler.
+
 ### Changed
 
 - README restructured as a ≤200-line landing page; reference content moved

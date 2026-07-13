@@ -32,8 +32,11 @@ templates.env.filters["toyaml"] = _toyaml
 
 @router.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
+    from stratum.core.sysdeps import missing_system_deps
+
     jobs = list_jobs()
     audits = list_audits()
+    missing_deps = missing_system_deps()
     return templates.TemplateResponse(
         request=request,
         name="index.html",
@@ -43,6 +46,7 @@ async def dashboard(request: Request):
             "providers": registry.names(),
             "recent_jobs": jobs[:5],
             "recent_audits": audits[:5],
+            "missing_deps": missing_deps,
         },
     )
 

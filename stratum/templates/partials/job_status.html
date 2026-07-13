@@ -48,6 +48,14 @@
       </div>
     </div>
 
+    {% if current_status == 'failed' and job and job.error %}
+    <!-- Failure reason panel (mirrors auditor/results.html) -->
+    <div data-testid="job-error" class="bg-rose-950/40 border border-rose-800/60 rounded-lg px-4 py-3">
+      <div class="text-[10px] font-bold uppercase text-rose-400 tracking-wider mb-1">Failure Reason</div>
+      <div class="text-sm text-rose-200 font-mono whitespace-pre-wrap">{{ job.error }}</div>
+    </div>
+    {% endif %}
+
     <!-- Build target metadata grid -->
     {% if job %}
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">

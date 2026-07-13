@@ -1,0 +1,59 @@
+name: Smoke-test published artifacts
+
+# Daily proof that what users actually download still installs and boots:
+# the PyPI package in a clean venv and the GHCR container image.
+# Catches broken releases and dependency drift the repo CI can't see.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pypi-install:
+    name: pip install from PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+        with:
+          python-version: "3.12"
+      - name: Install latest stratumoss from PyPI and boot it
+        run: |
+          python -m venv /tmp/smoke && . /tmp/smoke/bin/activate
+          pip install --quiet "stratumoss[all-providers]"
+          mkdir /tmp/rundir && cd /tmp/rundir
+          STRATUM_ADMIN_TOKEN=smoke python - <<'EOF'
+          from fastapi.testclient import TestClient
+          from stratum.main import app
+          import stratum
+          with TestClient(app) as c:
+              a = ("admin", "smoke")
+              assert c.get("/", auth=a).status_code == 200, "UI failed"
+              bps = c.get("/api/blueprints/", auth=a).json()
+              assert len(bps) >= 18, f"bundled blueprints missing: {len(bps)}"
+              cat = c.get("/api/plugins/catalog", auth=a).json()
+              assert len(cat) >= 5, f"provider catalog missing: {len(cat)}"
+              assert c.get("/static/js/htmx.min.js", auth=a).status_code == 200, "static assets missing"
+          print(f"PyPI smoke OK: stratumoss {stratum.__version__}")
+          EOF
+
+  ghcr-image:
+    name: docker run from GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull and boot the published image
+        run: |
+          docker run -d --rm --name smoke -e STRATUM_ADMIN_TOKEN=smoke -p 8000:8000 \
+            ghcr.io/stratumoss/stratum:latest
+          for i in $(seq 1 30); do
+            curl -sf -u admin:smoke http://127.0.0.1:8000/ >/dev/null && break
+            sleep 2
+          done
+          curl -sf -u admin:smoke http://127.0.0.1:8000/ >/dev/null || { docker logs smoke; exit 1; }
+          count=$(curl -sf -u admin:smoke http://127.0.0.1:8000/api/blueprints/ | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+          [ "$count" -ge 18 ] || { echo "expected >=18 blueprints, got $count"; exit 1; }
+          echo "GHCR smoke OK ($count blueprints)"
+          docker stop smoke

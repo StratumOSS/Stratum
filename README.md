@@ -6,6 +6,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![CI](https://github.com/StratumOSS/Stratum/actions/workflows/ci.yml/badge.svg)](https://github.com/StratumOSS/Stratum/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/StratumOSS/Stratum/badge)](https://scorecard.dev/viewer/?uri=github.com/StratumOSS/Stratum)
 [![Release](https://img.shields.io/github/v/release/StratumOSS/Stratum)](https://github.com/StratumOSS/Stratum/releases)
 
 <p align="center">

@@ -122,6 +122,9 @@ def mocked_build_env(kvm, tmp_path, monkeypatch):
     end-to-end against fakes instead of real subprocess/QEMU/SSH calls."""
     monkeypatch.setattr(kvm, "_LOCAL_IMAGES_DIR", tmp_path / "local-images")
     monkeypatch.setattr(kvm, "_BUILDS_DIR", tmp_path / "builds")
+    # The binary preflight would fail on hosts without qemu (e.g. CI runners);
+    # these tests exercise the build flow against fakes, not host readiness.
+    monkeypatch.setattr(kvm, "_require_binaries", lambda: None)
 
     base_image = tmp_path / "base.qcow2"
     base_image.write_bytes(b"fake-base-image")

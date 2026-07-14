@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./stratum/templates/**/*.html",
-    "./stratum/**/*.py"
+    "./invicton/templates/**/*.html",
+    "./invicton/**/*.py"
   ],
   theme: {
     extend: {

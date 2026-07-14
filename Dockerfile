@@ -1,6 +1,6 @@
 FROM python:3.14-slim
 
-# Install system dependencies required by Stratum
+# Install system dependencies required by Invicton
 # - curl/git for downloading things
 # - openssh-client and sshpass for Ansible to connect to dynamically provisioned hosts
 # - ansible/ansible-core for the hardening engine
@@ -40,5 +40,5 @@ ENV PYTHONUNBUFFERED=1
 # Expose the default Uvicorn port
 EXPOSE 8000
 
-# Start the Stratum server natively
-CMD ["uvicorn", "stratum.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start the Invicton server natively
+CMD ["uvicorn", "invicton.main:app", "--host", "0.0.0.0", "--port", "8000"]

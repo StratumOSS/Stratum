@@ -1,6 +1,6 @@
-# Stratum HardeningBlueprint — Debian 12 CIS Level 1 Server (DigitalOcean)
+# Invicton HardeningBlueprint — Debian 12 CIS Level 1 Server (DigitalOcean)
 
-stratum_version: "0.5.0"
+invicton_version: "0.5.0"
 kind: HardeningBlueprint
 
 metadata:
@@ -46,8 +46,8 @@ users:
   root:
     lock: true
   accounts:
-    - name: stratum-admin
-      comment: "Stratum-managed admin account"
+    - name: invicton-admin
+      comment: "Invicton-managed admin account"
       groups: [sudo]
       shell: /bin/bash
       ssh_authorized_keys: []

@@ -18,8 +18,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from stratum.core.llm.base import ToolUseBlock
-from stratum.core.llm.openai_backend import (
+from invicton.core.llm.base import ToolUseBlock
+from invicton.core.llm.openai_backend import (
     OpenAICompatBackend,
     _messages_to_openai,
     _messages_to_openai_clean,

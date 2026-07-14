@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from stratum.plugins.base_provider import BaseProvider, ProviderResult
-from stratum.plugins.loader import load_providers
-from stratum.plugins.registry import ProviderRegistry
+from invicton.plugins.base_provider import BaseProvider, ProviderResult
+from invicton.plugins.loader import load_providers
+from invicton.plugins.registry import ProviderRegistry
 
 # ===========================================================================
 # BaseProvider abstract method enforcement

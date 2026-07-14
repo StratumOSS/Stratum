@@ -1,12 +1,12 @@
 # Drop-in Provider Guide
 
-Drop any `.py` file in this directory and Stratum will load it automatically on startup — no pip install required.
+Drop any `.py` file in this directory and Invicton will load it automatically on startup — no pip install required.
 
 ## Minimal Provider
 
 ```python
-from stratum.plugins.base_provider import BaseProvider, ProviderResult
-from stratum.core.blueprint import ComplianceProfile
+from invicton.plugins.base_provider import BaseProvider, ProviderResult
+from invicton.core.blueprint import ComplianceProfile
 
 class MyProvider(BaseProvider):
     name = "myprovider"        # must be unique
@@ -35,7 +35,7 @@ class MyProvider(BaseProvider):
 Register your package's provider in `pyproject.toml`:
 
 ```toml
-[project.entry-points."stratum.providers"]
+[project.entry-points."invicton.providers"]
 myprovider = "mypackage.provider:MyProvider"
 ```
 

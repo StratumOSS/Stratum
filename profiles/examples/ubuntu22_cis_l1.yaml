@@ -1,11 +1,11 @@
-# Stratum ComplianceProfile — Ubuntu 22.04 CIS Level 1 Server
+# Invicton ComplianceProfile — Ubuntu 22.04 CIS Level 1 Server
 #
-# This file is the primary unit of configuration in Stratum.
-# Pass it to `stratum build` or select it in the UI.
+# This file is the primary unit of configuration in Invicton.
+# Pass it to `invicton build` or select it in the UI.
 #
-# Schema: ComplianceProfile (stratum.core.blueprint)
+# Schema: ComplianceProfile (invicton.core.blueprint)
 
-stratum_version: "0.5.0"
+invicton_version: "0.5.0"
 kind: ComplianceProfile
 
 metadata:

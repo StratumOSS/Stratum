@@ -31,7 +31,7 @@ class TestAnthropicImportError:
     @pytest.mark.anyio
     async def test_agent_turn_raises_runtime_error_when_anthropic_missing(self):
         """Lines 36-37: RuntimeError raised when 'anthropic' is not importable."""
-        from stratum.core.llm.anthropic_backend import AnthropicBackend
+        from invicton.core.llm.anthropic_backend import AnthropicBackend
 
         backend = AnthropicBackend()
         with patch.dict(sys.modules, {"anthropic": None}):
@@ -47,8 +47,8 @@ class TestAnthropicImportError:
 class TestPlaybookGenLvmNoVg:
     def test_lvm_tasks_skips_entry_with_no_vg(self):
         """Line 167: entry with mount_type=lvm but empty lvm_vg is skipped."""
-        from stratum.core.blueprint import MountEntry
-        from stratum.core.playbook_gen import _lvm_tasks
+        from invicton.core.blueprint import MountEntry
+        from invicton.core.playbook_gen import _lvm_tasks
 
         mounts = [
             MountEntry(
@@ -71,7 +71,7 @@ class TestPlaybookGenLvmNoVg:
 class TestRegistryS3SkipsNonYaml:
     def test_sync_s3_skips_non_yaml_keys(self):
         """Line 163: object keys without .yaml/.yml extension are skipped."""
-        from stratum.core.registry import ProfileRegistry, RegistrySource
+        from invicton.core.registry import ProfileRegistry, RegistrySource
 
         source = RegistrySource("s3", "my-bucket", "Private")
         registry = ProfileRegistry()
@@ -98,7 +98,7 @@ class TestRegistryS3SkipsNonYaml:
 # ===========================================================================
 
 _PROFILE_YAML = {
-    "stratum_version": "0.1.0",
+    "invicton_version": "0.1.0",
     "kind": "ComplianceProfile",
     "metadata": {"name": "builder-gap-test", "version": "1.0.0"},
     "target": {"os": "ubuntu22.04", "provider": "mock", "base_image": "ami-00"},
@@ -128,8 +128,8 @@ class TestBuilderGaps:
     @pytest.mark.anyio
     async def test_run_build_fail_on_findings_raises(self):
         """Line 136: RuntimeError raised when scan has failures and fail_on_findings=True."""
-        from stratum.core.blueprint import ComplianceProfile
-        from stratum.core.builder import run_build
+        from invicton.core.blueprint import ComplianceProfile
+        from invicton.core.builder import run_build
 
         profile = ComplianceProfile.model_validate(_PROFILE_YAML)
 
@@ -140,12 +140,12 @@ class TestBuilderGaps:
                 coro.close()
             return MagicMock()
 
-        with patch("stratum.core.builder.registry") as mock_reg:
+        with patch("invicton.core.builder.registry") as mock_reg:
             mock_reg.get.return_value = mock_cls
-            with patch("stratum.core.builder.generate_prehard_playbook", return_value=None):
-                with patch("stratum.core.builder.oscap_scanner.run_scan", return_value=Path("/tmp/scan.xml")):
-                    with patch("stratum.openscap.parser.parse_arf", return_value={"rules": [{"result": "fail"}]}):
-                        with patch("stratum.openscap.parser.RESULT_FAIL", "fail"):
+            with patch("invicton.core.builder.generate_prehard_playbook", return_value=None):
+                with patch("invicton.core.builder.oscap_scanner.run_scan", return_value=Path("/tmp/scan.xml")):
+                    with patch("invicton.openscap.parser.parse_arf", return_value={"rules": [{"result": "fail"}]}):
+                        with patch("invicton.openscap.parser.RESULT_FAIL", "fail"):
                             with patch("asyncio.create_task", side_effect=_close_coro):
                                 job = await run_build(profile, Path("/tmp"))
 
@@ -155,8 +155,8 @@ class TestBuilderGaps:
     @pytest.mark.anyio
     async def test_run_build_teardown_exception_logged(self):
         """Lines 169-170: teardown exception is logged but does not propagate."""
-        from stratum.core.blueprint import ComplianceProfile
-        from stratum.core.builder import run_build
+        from invicton.core.blueprint import ComplianceProfile
+        from invicton.core.builder import run_build
 
         profile = ComplianceProfile.model_validate(
             {**_PROFILE_YAML, "compliance": {**_PROFILE_YAML["compliance"], "fail_on_findings": False}}
@@ -171,9 +171,9 @@ class TestBuilderGaps:
                 coro.close()
             return MagicMock()
 
-        with patch("stratum.core.builder.registry") as mock_reg:
+        with patch("invicton.core.builder.registry") as mock_reg:
             mock_reg.get.return_value = mock_cls
-            with patch("stratum.core.builder.generate_prehard_playbook", return_value=None):
+            with patch("invicton.core.builder.generate_prehard_playbook", return_value=None):
                 with patch("asyncio.create_task", side_effect=_close_coro):
                     job = await run_build(profile, Path("/tmp"))
 
@@ -190,22 +190,22 @@ class TestMainStartup:
     @pytest.mark.anyio
     async def test_startup_logs_plugin_warnings(self):
         """Line 52: plugin warnings from registry.load are logged."""
-        from stratum.main import app, lifespan
+        from invicton.main import app, lifespan
 
-        with patch("stratum.main.registry.load", return_value=["PluginX: missing dependency"]):
-            with patch("stratum.main.credential_store.load"):
-                with patch("stratum.core.auditor.load_jobs"):
-                    with patch("stratum.core.api_keys.load_keys"):
-                        with patch("stratum.core.notifications.load_webhooks"):
-                            with patch("stratum.main.init_registry"):
+        with patch("invicton.main.registry.load", return_value=["PluginX: missing dependency"]):
+            with patch("invicton.main.credential_store.load"):
+                with patch("invicton.core.auditor.load_jobs"):
+                    with patch("invicton.core.api_keys.load_keys"):
+                        with patch("invicton.core.notifications.load_webhooks"):
+                            with patch("invicton.main.init_registry"):
                                 async with lifespan(app):
                                     pass
 
     @pytest.mark.anyio
     async def test_startup_with_s3_bucket_adds_source(self):
         """Line 62: S3 RegistrySource is inserted when blueprint_store_s3_bucket is set."""
-        from stratum.config import settings
-        from stratum.main import app, lifespan
+        from invicton.config import settings
+        from invicton.main import app, lifespan
 
         sources_seen = []
 
@@ -213,12 +213,12 @@ class TestMainStartup:
             sources_seen.extend(sources)
 
         with patch.object(settings, "blueprint_store_s3_bucket", "my-private-bucket"):
-            with patch("stratum.main.registry.load", return_value=[]):
-                with patch("stratum.main.credential_store.load"):
-                    with patch("stratum.core.auditor.load_jobs"):
-                        with patch("stratum.core.api_keys.load_keys"):
-                            with patch("stratum.core.notifications.load_webhooks"):
-                                with patch("stratum.main.init_registry", side_effect=capture_sources):
+            with patch("invicton.main.registry.load", return_value=[]):
+                with patch("invicton.main.credential_store.load"):
+                    with patch("invicton.core.auditor.load_jobs"):
+                        with patch("invicton.core.api_keys.load_keys"):
+                            with patch("invicton.core.notifications.load_webhooks"):
+                                with patch("invicton.main.init_registry", side_effect=capture_sources):
                                     async with lifespan(app):
                                         pass
 
@@ -235,7 +235,7 @@ class TestMainStartup:
 class TestBaseProviderRepr:
     def test_repr_returns_provider_name(self):
         """Line 52: __repr__ returns '<Provider name=...>' string."""
-        from stratum.plugins.subprocess_provider import SubprocessProvider
+        from invicton.plugins.subprocess_provider import SubprocessProvider
 
         class MockProvider(SubprocessProvider):
             name = "mock-repr-test"
@@ -255,7 +255,7 @@ class TestBaseProviderRepr:
 class TestCredentialStoreChmod:
     def test_persist_swallows_chmod_oserror(self, tmp_path):
         """Lines 87-88: OSError from chmod(0o600) on credentials file is silently ignored."""
-        from stratum.api.integrations import CredentialStore
+        from invicton.api.integrations import CredentialStore
 
         store = CredentialStore(tmp_path)
         store._store = {"aws": {"access_key": "AKID"}}

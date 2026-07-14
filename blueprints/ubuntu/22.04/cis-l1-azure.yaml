@@ -1,8 +1,8 @@
-# Stratum HardeningBlueprint — Ubuntu 22.04 LTS CIS Level 1 Server (Azure)
+# Invicton HardeningBlueprint — Ubuntu 22.04 LTS CIS Level 1 Server (Azure)
 #
 # Same compliance posture as ubuntu22-cis-l1-aws.yaml, targeting Azure.
 
-stratum_version: "0.5.0"
+invicton_version: "0.5.0"
 kind: HardeningBlueprint
 
 metadata:
@@ -59,8 +59,8 @@ users:
     lock: true
 
   accounts:
-    - name: stratum-admin
-      comment: "Stratum-managed admin account"
+    - name: invicton-admin
+      comment: "Invicton-managed admin account"
       groups:
         - sudo
       shell: /bin/bash

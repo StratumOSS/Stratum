@@ -3,17 +3,17 @@
 # Copyright 2026 Vamshi Krishna Santhapuri
 """Proxmox VE subprocess provider — speaks JSON-RPC over stdin/stdout.
 
-Run as a standalone script: the core Stratum engine never imports this file.
+Run as a standalone script: the core Invicton engine never imports this file.
 Logs go to stderr; only JSON-RPC responses go to stdout.
 
 Requires the [proxmox] optional extra:
-    pip install 'stratum[proxmox]'
+    pip install 'invicton[proxmox]'
     # or: pip install proxmoxer requests
 
 Setup requirements:
   - A base VM template on Proxmox (set base_image to its VMID, e.g. "9000")
   - The template must have cloud-init support (or a pre-injected SSH key)
-  - The Stratum host must be able to SSH to the cloned VM
+  - The Invicton host must be able to SSH to the cloned VM
   - Proxmox API token with VM.Clone, VM.Config.*, VM.PowerMgmt, VM.Audit perms
 """
 
@@ -55,10 +55,10 @@ def _generate_ssh_keypair() -> tuple[str, str, str]:
     """Generate an ephemeral ed25519 key pair. Returns (key_path, pub_key, tmp_dir)."""
     import tempfile
 
-    tmp = tempfile.mkdtemp(prefix="stratum-proxmox-key-")
-    key_path = os.path.join(tmp, "stratum-build")
+    tmp = tempfile.mkdtemp(prefix="invicton-proxmox-key-")
+    key_path = os.path.join(tmp, "invicton-build")
     subprocess.run(
-        ["ssh-keygen", "-t", "ed25519", "-f", key_path, "-N", "", "-C", "stratum-build"],
+        ["ssh-keygen", "-t", "ed25519", "-f", key_path, "-N", "", "-C", "invicton-build"],
         check=True,
         capture_output=True,
     )
@@ -156,7 +156,7 @@ def _get_proxmox_client(creds: dict):
     try:
         from proxmoxer import ProxmoxAPI
     except ImportError as exc:
-        raise RuntimeError("proxmoxer is not installed. Run: pip install 'stratum[proxmox]'") from exc
+        raise RuntimeError("proxmoxer is not installed. Run: pip install 'invicton[proxmox]'") from exc
     # Stored/submitted as a bool, or "true"/"false" strings from a form/JSON
     # body — a bare `.get(..., False)` would treat the string "false" as truthy.
     verify_ssl = str(creds.get("verify_ssl", False)).strip().lower() in ("true", "on", "1", "yes")
@@ -256,7 +256,7 @@ def execute_build(params: dict) -> dict:
 
     new_vmid = _next_vmid(proxmox)
     safe_name = profile_name.lower().replace("_", "-").replace(".", "-")[:20]
-    vm_name = f"stratum-{safe_name}-{new_vmid}"
+    vm_name = f"invicton-{safe_name}-{new_vmid}"
     logger.info("Cloning template VMID %d → new VMID %d (%s)", template_vmid, new_vmid, vm_name)
 
     try:
@@ -332,9 +332,9 @@ def execute_build(params: dict) -> dict:
                 "benchmark": params.get("benchmark", ""),
                 "profile": profile_id,
                 "datastream": datastream,
-                "stratum_target_os": params.get("os", "ubuntu22"),
+                "invicton_target_os": params.get("os", "ubuntu22"),
             }
-            extra_vars_path = os.path.join(tmp_dir, "stratum_vars.json")
+            extra_vars_path = os.path.join(tmp_dir, "invicton_vars.json")
             with open(extra_vars_path, "w") as fh:
                 json.dump(extra_vars, fh)
 
@@ -342,7 +342,7 @@ def execute_build(params: dict) -> dict:
                 role = hardening_config.get("role", "auto")
                 logger.info("Running Ansible-Lockdown hardening (role: %s)", role)
                 # Pass the strategy variables to the local site.yml wrapper
-                extra_vars["stratum_lockdown_role"] = role
+                extra_vars["invicton_lockdown_role"] = role
                 with open(extra_vars_path, "w") as fh:
                     json.dump(extra_vars, fh)
 
@@ -379,14 +379,14 @@ def execute_build(params: dict) -> dict:
         # OpenSCAP compliance scan
         logger.info("Running OpenSCAP scan")
         oscap_cmd = (
-            f"oscap xccdf eval --profile {profile_id} --results /tmp/stratum-scap-results.xml {datastream} || true"
+            f"oscap xccdf eval --profile {profile_id} --results /tmp/invicton-scap-results.xml {datastream} || true"
         )
         _run_remote_cmd(ssh_host, key_path, ssh_user, oscap_cmd, timeout=600)
 
         # Cleanup history
         logger.info("Cleaning up instance logs and history via SSH")
         cleanup_cmds = [
-            "rm -rf /tmp/stratum-*",
+            "rm -rf /tmp/invicton-*",
             "rm -f /var/log/messages /var/log/syslog /var/log/auth.log",
             "journalctl --vacuum-time=1s || true",
             "sh -c 'cat /dev/null > /var/log/wtmp' || true",
@@ -412,7 +412,7 @@ def execute_build(params: dict) -> dict:
 
         # Rename template to reflect the profile
         safe_version = profile_version.replace(".", "-")
-        template_name = f"stratum-{safe_name}-{safe_version}"
+        template_name = f"invicton-{safe_name}-{safe_version}"
         proxmox.nodes(node).qemu(new_vmid).config.post(name=template_name)
 
         artifact_id = str(new_vmid)

@@ -8,9 +8,9 @@ REGION="${REGION:-us-central1}"
 ZONE="${ZONE:-us-central1-a}"
 NETWORK="${NETWORK:-default}"
 SUBNETWORK="${SUBNETWORK:-}"
-ROLE_ID="${ROLE_ID:-stratumScanner}"
-SERVICE_ACCOUNT_ID="${SERVICE_ACCOUNT_ID:-stratum-scanner}"
-FIREWALL_RULE="${FIREWALL_RULE:-stratum-allow-iap-ssh}"
+ROLE_ID="${ROLE_ID:-invictonScanner}"
+SERVICE_ACCOUNT_ID="${SERVICE_ACCOUNT_ID:-invicton-scanner}"
+FIREWALL_RULE="${FIREWALL_RULE:-invicton-allow-iap-ssh}"
 PRINCIPAL="${PRINCIPAL:-}"
 
 if ! command -v gcloud >/dev/null 2>&1; then
@@ -25,15 +25,15 @@ if [[ -z "${PRINCIPAL}" ]]; then
   if ! gcloud iam service-accounts describe "${SERVICE_ACCOUNT_ID}@${PROJECT_ID}.iam.gserviceaccount.com" --project "${PROJECT_ID}" >/dev/null 2>&1; then
     gcloud iam service-accounts create "${SERVICE_ACCOUNT_ID}" \
       --project "${PROJECT_ID}" \
-      --display-name "Stratum scanner service account"
+      --display-name "Invicton scanner service account"
   fi
   PRINCIPAL="serviceAccount:${SERVICE_ACCOUNT_ID}@${PROJECT_ID}.iam.gserviceaccount.com"
 fi
 
 if gcloud iam roles describe "${ROLE_ID}" --project "${PROJECT_ID}" >/dev/null 2>&1; then
-  gcloud iam roles update "${ROLE_ID}" --project "${PROJECT_ID}" --file "${SCRIPT_DIR}/stratum-scanner-role.yaml"
+  gcloud iam roles update "${ROLE_ID}" --project "${PROJECT_ID}" --file "${SCRIPT_DIR}/invicton-scanner-role.yaml"
 else
-  gcloud iam roles create "${ROLE_ID}" --project "${PROJECT_ID}" --file "${SCRIPT_DIR}/stratum-scanner-role.yaml"
+  gcloud iam roles create "${ROLE_ID}" --project "${PROJECT_ID}" --file "${SCRIPT_DIR}/invicton-scanner-role.yaml"
 fi
 
 gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
@@ -52,19 +52,19 @@ if gcloud compute firewall-rules describe "${FIREWALL_RULE}" --project "${PROJEC
     --network "${NETWORK}" \
     --allow tcp:22 \
     --source-ranges 35.235.240.0/20 \
-    --target-tags stratum-build,stratum-scan
+    --target-tags invicton-build,invicton-scan
 else
   gcloud compute firewall-rules create "${FIREWALL_RULE}" \
     --project "${PROJECT_ID}" \
     --network "${NETWORK}" \
     --allow tcp:22 \
     --source-ranges 35.235.240.0/20 \
-    --target-tags stratum-build,stratum-scan \
-    --description "Allow Stratum SSH through Google Cloud IAP only."
+    --target-tags invicton-build,invicton-scan \
+    --description "Allow Invicton SSH through Google Cloud IAP only."
 fi
 
 cat <<EOF
-Stratum GCP scanner onboarding complete.
+Invicton GCP scanner onboarding complete.
 
 Paste these values into Integrations -> GCP:
   project_id: ${PROJECT_ID}

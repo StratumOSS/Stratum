@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Something in Stratum isn't working as expected
+about: Something in Invicton isn't working as expected
 title: ""
 labels: bug
 assignees: ""
@@ -25,7 +25,7 @@ What actually happened — include the full error message / stack trace / API
 response if there is one.
 
 **Environment**
-- Stratum version (`pyproject.toml` version or commit hash):
+- Invicton version (`pyproject.toml` version or commit hash):
 - Deployment: Docker Compose / local `uv run` / other:
 - Cloud provider(s) involved, if any:
 - OS/target image:

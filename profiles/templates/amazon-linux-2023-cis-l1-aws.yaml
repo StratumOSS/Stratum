@@ -1,9 +1,9 @@
-# Stratum HardeningBlueprint — Amazon Linux 2023 CIS Level 1 Server (AWS)
+# Invicton HardeningBlueprint — Amazon Linux 2023 CIS Level 1 Server (AWS)
 #
 # Amazon Linux 2023 is AWS's first-party Linux distribution.
 # It uses the RHEL 9 / Fedora lineage and is supported by SCAP Security Guide.
 
-stratum_version: "0.5.0"
+invicton_version: "0.5.0"
 kind: HardeningBlueprint
 
 metadata:
@@ -86,8 +86,8 @@ users:
     lock: true
 
   accounts:
-    - name: stratum-admin
-      comment: "Stratum-managed admin account"
+    - name: invicton-admin
+      comment: "Invicton-managed admin account"
       groups:
         - wheel
       shell: /bin/bash

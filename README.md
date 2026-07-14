@@ -1,24 +1,24 @@
-# Stratum
+# Invicton
 
-**Describe your hardened OS in a YAML blueprint; Stratum builds the CIS/STIG-benchmarked golden image on any cloud — or locally on KVM — and hands you the compliance evidence.**
+**Describe your hardened OS in a YAML blueprint; Invicton builds the CIS/STIG-benchmarked golden image on any cloud — or locally on KVM — and hands you the compliance evidence.**
 
-[![PyPI](https://img.shields.io/pypi/v/stratumoss?color=brightgreen)](https://pypi.org/project/stratumoss/)
+[![PyPI](https://img.shields.io/pypi/v/invicton?color=brightgreen)](https://pypi.org/project/invicton/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
-[![CI](https://github.com/StratumOSS/Stratum/actions/workflows/ci.yml/badge.svg)](https://github.com/StratumOSS/Stratum/actions/workflows/ci.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/StratumOSS/Stratum/badge)](https://scorecard.dev/viewer/?uri=github.com/StratumOSS/Stratum)
-[![Release](https://img.shields.io/github/v/release/StratumOSS/Stratum)](https://github.com/StratumOSS/Stratum/releases)
+[![CI](https://github.com/invicton/Invicton/actions/workflows/ci.yml/badge.svg)](https://github.com/invicton/Invicton/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/invicton/Invicton/badge)](https://scorecard.dev/viewer/?uri=github.com/invicton/Invicton)
+[![Release](https://img.shields.io/github/v/release/invicton/Invicton)](https://github.com/invicton/Invicton/releases)
 
 <p align="center">
-  <img src="docs/assets/stratum-dashboard.svg" alt="Stratum dashboard preview" width="900">
+  <img src="docs/assets/invicton-dashboard.svg" alt="Invicton dashboard preview" width="900">
 </p>
 
-## Why Stratum
+## Why Invicton
 
 Hardened image builds are usually manual, non-reproducible, and audited in a
 scramble: someone runs a checklist against a VM, someone else screenshots the
 scanner output, and six months later nobody can say why a rule was disabled.
-Stratum collapses that into one version-controlled YAML file — the blueprint —
+Invicton collapses that into one version-controlled YAML file — the blueprint —
 and gives every build the same pipeline: provision, harden with
 [Ansible-Lockdown](https://github.com/ansible-lockdown), scan with OpenSCAP,
 snapshot, tear down. Your security team gets an A–F grade and a SARIF report;
@@ -31,7 +31,7 @@ HardeningBlueprint (YAML)  ──or──  5-Step Guided Wizard
         │
         ▼
   ┌─────────────────────────────────────────────────────┐
-  │  Stratum Engine                                      │
+  │  Invicton Engine                                      │
   │                                                      │
   │  1. Provision  →  Spin up a temporary VM             │
   │  2. Harden     →  Apply Ansible-Lockdown CIS/STIG    │
@@ -58,14 +58,14 @@ HardeningBlueprint (YAML)  ──or──  5-Step Guided Wizard
 ### Docker Compose (recommended — everything preinstalled)
 
 ```bash
-git clone https://github.com/StratumOSS/Stratum.git
-cd Stratum
+git clone https://github.com/invicton/Invicton.git
+cd Invicton
 docker compose up
 ```
 
 Open **http://localhost:8001**. Log in with any username and your admin token
 as the password — it's auto-generated on first start and saved to
-`data/.admin_token` (set `STRATUM_ADMIN_TOKEN` and `STRATUM_SECRET_KEY` in
+`data/.admin_token` (set `INVICTON_ADMIN_TOKEN` and `INVICTON_SECRET_KEY` in
 `docker-compose.yml` for stable logins and credentials that survive rebuilds).
 
 Compose mounts `~/.aws`, `~/.config/gcloud`, and `~/.ssh` read paths plus
@@ -74,14 +74,14 @@ persistent `./data`, `./profiles`, and `./plugins/providers` automatically.
 ### Published image
 
 ```bash
-docker run -p 8000:8000 rrskris/stratum:latest
+docker run -p 8000:8000 rrskris/invicton:latest
 ```
 
 ### PyPI
 
 ```bash
-pip install "stratumoss[all-providers]"   # or pick extras: aws, gcp, azure, linode, digitalocean, proxmox
-uvicorn stratum.main:app --port 8000
+pip install "invicton[all-providers]"   # or pick extras: aws, gcp, azure, linode, digitalocean, proxmox
+uvicorn invicton.main:app --port 8000
 ```
 
 Built-in blueprint templates and the provider catalog ship inside the package,
@@ -92,10 +92,10 @@ builds — see [Configuration](docs/configuration.md).
 ### From source (contributors)
 
 ```bash
-git clone https://github.com/StratumOSS/Stratum.git && cd Stratum
+git clone https://github.com/invicton/Invicton.git && cd Invicton
 uv sync --extra all-providers --group dev
 cp .env.example .env
-uv run uvicorn stratum.main:app --reload --port 8000
+uv run uvicorn invicton.main:app --reload --port 8000
 ```
 
 **No cloud account?** The `kvm` provider builds hardened qcow2/raw images
@@ -146,7 +146,7 @@ first-run walkthrough: [Getting Started](docs/getting-started.md).
 | DigitalOcean | Snapshot | API token |
 | Linode | Private Image | API token |
 | Proxmox | VM Template | API token or username/password |
-| KVM (local) | qcow2 / raw | none — runs on the Stratum host |
+| KVM (local) | qcow2 / raw | none — runs on the Invicton host |
 
 Cloud onboarding uses reviewable least-privilege templates
 (CloudFormation / ARM / `gcloud` scripts) — see
@@ -173,13 +173,13 @@ Cloud onboarding uses reviewable least-privilege templates
 | [Plugin Guide](docs/plugin-guide.md) | Writing and distributing provider plugins |
 | [Architecture](docs/architecture.md) | Pipeline state machine, source tree, design decisions |
 | [Blueprint Library Guide](blueprints/CONTRIBUTING.md) | Contributing community blueprints |
-| [Roadmap](ROADMAP.md) | Where Stratum is headed and how to influence it |
+| [Roadmap](ROADMAP.md) | Where Invicton is headed and how to influence it |
 
 ## Contributing
 
 Bug reports, feature requests, and PRs are welcome — see
 [CONTRIBUTING.md](CONTRIBUTING.md) for the dev workflow and
-[`good first issue`](https://github.com/StratumOSS/Stratum/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+[`good first issue`](https://github.com/invicton/Invicton/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 for curated starting points (most are pure-YAML blueprint work with acceptance
 criteria and a local verify command included). Please follow the
 [Code of Conduct](CODE_OF_CONDUCT.md). Found a security issue? See

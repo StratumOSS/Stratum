@@ -3,12 +3,12 @@
 # Copyright 2026 Vamshi Krishna Santhapuri
 """Azure subprocess provider — speaks JSON-RPC over stdin/stdout.
 
-Run as a standalone script: the core Stratum engine never imports this file.
+Run as a standalone script: the core Invicton engine never imports this file.
 Logs go to stderr; only JSON-RPC responses go to stdout.
 
-Requires the [azure] optional extra: pip install stratum[azure]
+Requires the [azure] optional extra: pip install invicton[azure]
 
-Credential fields (stored via Stratum integrations UI):
+Credential fields (stored via Invicton integrations UI):
     tenant_id         — Azure AD tenant ID (required)
     client_id         — Service principal app ID (required)
     client_secret     — Service principal secret (required)
@@ -57,7 +57,7 @@ def _get_credential(credentials: dict):
     try:
         from azure.identity import ClientSecretCredential
     except ImportError as exc:
-        raise RuntimeError("azure-identity not installed. Install with: pip install stratum[azure]") from exc
+        raise RuntimeError("azure-identity not installed. Install with: pip install invicton[azure]") from exc
     return ClientSecretCredential(
         tenant_id=credentials["tenant_id"],
         client_id=credentials["client_id"],
@@ -159,18 +159,18 @@ def execute_build(params: dict) -> dict:
     network = _network_client(cred, subscription_id)
 
     # Unique suffix for all build resources
-    suffix = f"stratum{int(time.time())}"
-    vm_name = f"stratum-bld-{suffix[:18]}"
-    nic_name = f"stratum-nic-{suffix[:18]}"
-    pip_name = f"stratum-pip-{suffix[:18]}"
-    vnet_name = f"stratum-vnet-{suffix[:18]}"
-    subnet_name = "stratum-subnet"
-    disk_name = f"stratum-disk-{suffix[:18]}"
-    captured_image_name = f"stratum-{profile_name.lower()[:30]}-{profile_version.replace('.', '-')}"
+    suffix = f"invicton{int(time.time())}"
+    vm_name = f"invicton-bld-{suffix[:18]}"
+    nic_name = f"invicton-nic-{suffix[:18]}"
+    pip_name = f"invicton-pip-{suffix[:18]}"
+    vnet_name = f"invicton-vnet-{suffix[:18]}"
+    subnet_name = "invicton-subnet"
+    disk_name = f"invicton-disk-{suffix[:18]}"
+    captured_image_name = f"invicton-{profile_name.lower()[:30]}-{profile_version.replace('.', '-')}"
 
     resources_to_delete = []
 
-    with tempfile.TemporaryDirectory(prefix="stratum-azure-") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="invicton-azure-") as tmpdir:
         tmp = Path(tmpdir)
         key_path, pub_key = utils.generate_ssh_keypair(tmp)
         ip_address: str | None = None
@@ -241,7 +241,7 @@ def execute_build(params: dict) -> dict:
                     location=location,
                     ip_configurations=[
                         NetworkInterfaceIPConfiguration(
-                            name="stratum-ipconfig",
+                            name="invicton-ipconfig",
                             subnet={"id": subnet_id},
                             public_ip_address={"id": pip.id},
                         )
@@ -284,7 +284,7 @@ def execute_build(params: dict) -> dict:
                     ),
                 ),
                 os_profile=OSProfile(
-                    computer_name="stratum-build",
+                    computer_name="invicton-build",
                     admin_username=ssh_user,
                     linux_configuration=LinuxConfiguration(
                         disable_password_authentication=True,
@@ -301,7 +301,7 @@ def execute_build(params: dict) -> dict:
                 network_profile=NetworkProfile(
                     network_interfaces=[NetworkInterfaceReference(id=nic.id, primary=True)],
                 ),
-                tags={"managed-by": "stratum", "blueprint": profile_name},
+                tags={"managed-by": "invicton", "blueprint": profile_name},
             )
             vm_poller = compute.virtual_machines.begin_create_or_update(rg, vm_name, vm_params)
             _wait_lro(vm_poller, timeout=600)
@@ -357,7 +357,7 @@ def execute_build(params: dict) -> dict:
                 Image(
                     location=location,
                     source_virtual_machine={"id": compute.virtual_machines.get(rg, vm_name).id},
-                    tags={"managed-by": "stratum", "blueprint": profile_name},
+                    tags={"managed-by": "invicton", "blueprint": profile_name},
                 ),
             )
             _wait_lro(img_poller, timeout=600)
@@ -415,7 +415,7 @@ def execute_audit(params: dict) -> dict:
     if not ssh_key_pem:
         raise ValueError("execute_audit requires 'ssh_key' (private key PEM)")
 
-    with tempfile.TemporaryDirectory(prefix="stratum-az-audit-") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="invicton-az-audit-") as tmpdir:
         key_path = Path(tmpdir) / "audit_key"
         key_path.write_text(ssh_key_pem)
         key_path.chmod(0o600)

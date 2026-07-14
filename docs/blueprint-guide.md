@@ -3,7 +3,7 @@
 Blueprints are YAML documents that fully describe a hardened image. Every field
 has a safe default — start minimal and add only what you need.
 
-Annotated starter template: [`stratum-blueprints-template.yaml`](stratum-blueprints-template.yaml).
+Annotated starter template: [`invicton-blueprints-template.yaml`](invicton-blueprints-template.yaml).
 Contributing a blueprint to the community library? See
 [`blueprints/CONTRIBUTING.md`](../blueprints/CONTRIBUTING.md) for the
 field-by-field anatomy, naming convention, and SCAP profile reference table.
@@ -11,7 +11,7 @@ field-by-field anatomy, naming convention, and SCAP profile reference table.
 ## Minimal example
 
 ```yaml
-stratum_version: "0.5.0"
+invicton_version: "0.5.0"
 kind: HardeningBlueprint
 
 metadata:
@@ -35,7 +35,7 @@ compliance:
 ## Full schema
 
 ```yaml
-stratum_version: "0.5.0"
+invicton_version: "0.5.0"
 kind: HardeningBlueprint
 
 metadata:
@@ -76,7 +76,7 @@ users:
   root:
     lock: true
   accounts:
-    - name: stratum-admin
+    - name: invicton-admin
       groups: [wheel]
       shell: /bin/bash
       ssh_authorized_keys: []
@@ -135,7 +135,7 @@ Load any of them in the UI or reference them by name.
 
 The top-level [`blueprints/`](../blueprints/) folder is the public library
 surface for contributor-submitted blueprints — more OS/provider/framework
-combinations without changing the Stratum engine.
+combinations without changing the Invicton engine.
 
 The folder is organized by OS family and version:
 
@@ -158,12 +158,12 @@ checklist. Blueprint schema and index consistency are CI-enforced.
 ```bash
 # Validate one file via the API (server running)
 curl -s -X POST http://localhost:8000/api/blueprints/validate \
-  -u admin:$STRATUM_ADMIN_TOKEN \
+  -u admin:$INVICTON_ADMIN_TOKEN \
   --data-binary @my-blueprint.yaml
 
 # Validate every template offline
 uv run python -c "
-from stratum.core.blueprint import HardeningBlueprint
+from invicton.core.blueprint import HardeningBlueprint
 import glob, yaml
 for f in glob.glob('profiles/**/*.yaml', recursive=True):
     HardeningBlueprint(**yaml.safe_load(open(f)))

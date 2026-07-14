@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from stratum.openscap.parser import (
+from invicton.openscap.parser import (
     compute_delta,
     parse_arf,
 )

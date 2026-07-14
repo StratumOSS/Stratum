@@ -1,8 +1,8 @@
-# Stratum Test Plan
+# Invicton Test Plan
 
 **Version:** 0.3.0  
 **Date:** 2026-04-09  
-**Scope:** All testable layers of the Stratum platform
+**Scope:** All testable layers of the Invicton platform
 
 ---
 
@@ -31,7 +31,7 @@ These test individual modules in isolation, with no running server and no extern
 
 | ID | Test Case | Input | Expected |
 |---|---|---|---|
-| BP-01 | Missing required field `stratum_version` | Profile dict without `stratum_version` | `ValidationError` raised |
+| BP-01 | Missing required field `invicton_version` | Profile dict without `invicton_version` | `ValidationError` raised |
 | BP-02 | Missing required `compliance.datastream` | Profile without `datastream` | `ValidationError` raised |
 | BP-03 | `controls` with mixed bool and override object | `{"rule_a": True, "rule_b": {"enabled": False, "justification": "x"}}` | Both parsed correctly |
 | BP-04 | `load_profile` on non-YAML file | `.txt` file path | `ValueError` or `ValidationError` |
@@ -82,7 +82,7 @@ These test individual modules in isolation, with no running server and no extern
 | WH-02 | `list_webhooks` omits `secret` | Register, then list | No `"secret"` in any listed entry |
 | WH-03 | `remove_webhook` on nonexistent ID | `remove_webhook("bad_id")` | Returns `False` |
 | WH-04 | Invalid event is filtered out on register | `events=["scan.complete", "not.real"]` | Stored entry only contains `"scan.complete"` |
-| WH-05 | HMAC-SHA256 signature is correct | Mock `httpx.AsyncClient.post`, capture `X-Stratum-Signature` header | Header matches `hmac.new(secret, body, sha256).hexdigest()` |
+| WH-05 | HMAC-SHA256 signature is correct | Mock `httpx.AsyncClient.post`, capture `X-Invicton-Signature` header | Header matches `hmac.new(secret, body, sha256).hexdigest()` |
 | WH-06 | `fire_webhook` only fires to subscribed events | Two webhooks: one for `scan.complete`, one for `build.complete`; fire `scan.complete` | Only first hook receives the POST |
 | WH-07 | `fire_webhook` on disabled webhook | Register webhook, set `"enabled": False`, fire | No HTTP POST made |
 | WH-08 | `fire_webhook` swallows HTTP errors | Mock `httpx` to raise `ConnectError` | No exception propagates; warning logged |
@@ -218,7 +218,7 @@ Each test uses `unittest.mock.patch` to mock the cloud SDK call. No live cloud c
 |---|---|---|
 | SEC-01 | Tampered payload body changes signature | Computed signature does not match original |
 | SEC-02 | Wrong secret produces different signature | `hmac.compare_digest` returns `False` |
-| SEC-03 | Signature prefix is `sha256=` | `X-Stratum-Signature` header starts with `sha256=` |
+| SEC-03 | Signature prefix is `sha256=` | `X-Invicton-Signature` header starts with `sha256=` |
 
 #### 4.2 API Key Security (`test_api_key_security.py`)
 
@@ -245,7 +245,7 @@ These run on every CI commit against a locally running instance (no cloud).
 
 | ID | Test Case | Tool | Expected |
 |---|---|---|---|
-| REG-01 | App starts without error | `uvicorn stratum.main:app` | Process exits 0 within 5 seconds of startup check |
+| REG-01 | App starts without error | `uvicorn invicton.main:app` | Process exits 0 within 5 seconds of startup check |
 | REG-02 | `GET /` returns 200 | `httpx` | Status 200, HTML body |
 | REG-03 | `GET /api/auditor/jobs` returns empty list on fresh start | `httpx` | `[]` |
 | REG-04 | `GET /api/api-keys` returns empty list on fresh start | `httpx` | `[]` |
@@ -309,8 +309,8 @@ tests/
 ```python
 import pytest
 from fastapi.testclient import TestClient
-from stratum.main import app
-from stratum.core import api_keys
+from invicton.main import app
+from invicton.core import api_keys
 
 @pytest.fixture
 def client():
@@ -340,7 +340,7 @@ pytest tests/api/
 pytest tests/security/
 
 # With coverage
-pytest --cov=stratum --cov=plugins --cov-report=term-missing
+pytest --cov=invicton --cov=plugins --cov-report=term-missing
 ```
 
 ---
@@ -349,17 +349,17 @@ pytest --cov=stratum --cov=plugins --cov-report=term-missing
 
 | Layer | Current | Target |
 |---|---|---|
-| `stratum/core/blueprint.py` | ~90% | 95% |
-| `stratum/core/parser.py` | ~85% | 95% |
-| `stratum/openscap/parser.py` | ~80% | 90% |
-| `stratum/plugins/` | ~75% | 90% |
-| `stratum/core/api_keys.py` | 0% | 90% |
-| `stratum/core/notifications.py` | 0% | 85% |
-| `stratum/core/playbook_gen.py` | 0% | 80% |
-| `stratum/api/auditor.py` | 0% | 80% |
-| `stratum/api/pipeline.py` | 0% | 85% |
-| `stratum/api/api_keys.py` | 0% | 90% |
-| `stratum/api/webhooks.py` | 0% | 85% |
+| `invicton/core/blueprint.py` | ~90% | 95% |
+| `invicton/core/parser.py` | ~85% | 95% |
+| `invicton/openscap/parser.py` | ~80% | 90% |
+| `invicton/plugins/` | ~75% | 90% |
+| `invicton/core/api_keys.py` | 0% | 90% |
+| `invicton/core/notifications.py` | 0% | 85% |
+| `invicton/core/playbook_gen.py` | 0% | 80% |
+| `invicton/api/auditor.py` | 0% | 80% |
+| `invicton/api/pipeline.py` | 0% | 85% |
+| `invicton/api/api_keys.py` | 0% | 90% |
+| `invicton/api/webhooks.py` | 0% | 85% |
 | **Overall** | **~35%** | **80%** |
 
 ---
@@ -370,4 +370,4 @@ pytest --cov=stratum --cov=plugins --cov-report=term-missing
 - **Live Ansible-Lockdown execution** — Requires a real target VM. Test via subprocess provider mock instead.
 - **Live OpenSCAP binary** — Use pre-generated ARF XML fixtures rather than invoking `oscap`.
 - **UI / browser tests** — The Jinja2 templates render HTML; full Playwright/Selenium E2E tests are deferred until the UI stabilizes.
-- **AI Agent** (`stratum/core/agent.py`) — Requires a live Anthropic API key and produces non-deterministic output. Test prompt construction and context building only; mock the `anthropic` client.
+- **AI Agent** (`invicton/core/agent.py`) — Requires a live Anthropic API key and produces non-deterministic output. Test prompt construction and context building only; mock the `anthropic` client.

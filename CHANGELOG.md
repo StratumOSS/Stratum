@@ -1,10 +1,30 @@
 # Changelog
 
-All notable changes to Stratum are documented here.
+All notable changes to Invicton are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+> **Note:** Invicton was released as **Stratum** (PyPI distribution `stratumoss`,
+> GitHub org `StratumOSS`) through v0.5.2. Entries dated before the 0.6.0 rename
+> describe the project under its former name.
+
 ---
+
+## [0.6.0] — 2026-07-14
+
+### Changed
+
+- **Renamed the project from Stratum to Invicton** (Latin *Invictus* —
+  "unconquered, invincible" — a better fit for a hardening tool, and free of
+  the naming collision the common word "Stratum" carried). Done pre-launch to
+  minimise disruption. Concretely:
+  - PyPI distribution `stratumoss` → **`invicton`**; Python module
+    `import stratum` → `import invicton`; server `uvicorn invicton.main:app`.
+  - GitHub org/repo `StratumOSS/Stratum` → **`invicton/Invicton`** (old URLs
+    redirect); images `ghcr.io/invicton/invicton` + `rrskris/invicton`.
+  - Environment prefix `STRATUM_*` → **`INVICTON_*`**; blueprint schema field
+    `stratum_version` → **`invicton_version`**.
+  - The old `stratumoss` PyPI package (v0.5.2) remains as a tombstone.
 
 ## [Unreleased]
 
@@ -14,7 +34,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `GET /api/system/deps` report each required host tool (ansible, ssh,
   oscap, qemu, cloud-localds/genisoimage) with presence, path, what it's
   needed for, and an install hint; the dashboard shows a banner when
-  something a build/scan needs is missing (`stratum/core/sysdeps.py`).
+  something a build/scan needs is missing (`invicton/core/sysdeps.py`).
 - Global exception handler: unhandled errors now return a structured
   500 with a short `error_id` that appears next to the full traceback
   in the server log — no internals leak, and bug reports are
@@ -43,8 +63,8 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.5.2] — 2026-07-11
 
-First release published to PyPI (`pip install stratumoss`) with a
-container image on GHCR (`ghcr.io/stratumoss/stratum`) and Docker Hub.
+First release published to PyPI (as `pip install stratumoss`, the project's
+name at the time) with a container image on GHCR and Docker Hub.
 
 ### Added
 
@@ -57,13 +77,13 @@ container image on GHCR (`ghcr.io/stratumoss/stratum`) and Docker Hub.
 
 ### Fixed
 
-**`pip install stratumoss` now works from any directory — previously the app only ran from a repo checkout**
+**`pip install invicton` now works from any directory — previously the app only ran from a repo checkout**
 
 - Jinja2 templates and static assets were loaded from CWD-relative paths
-  (`stratum/templates`, `stratum/static`), so every UI page 500'd with
+  (`invicton/templates`, `invicton/static`), so every UI page 500'd with
   `TemplateNotFound` and CSS/JS never mounted unless the server was started
   from the repo root. All paths are now anchored to the installed package
-  (`stratum/paths.py`).
+  (`invicton/paths.py`).
 - Built-in blueprint templates (`profiles/templates/`) and the provider
   catalog (`plugins/catalog/`) now ship inside the wheel; `Settings` falls
   back to the bundled copies when the CWD-relative directories are missing.
@@ -86,24 +106,24 @@ container image on GHCR (`ghcr.io/stratumoss/stratum`) and Docker Hub.
 ### Changed
 
 - Dropped the "open-core" label from all public copy (README, repo
-  description, package metadata, CONTRIBUTING). Stratum is straight
+  description, package metadata, CONTRIBUTING). Invicton is straight
   Apache-2.0; a commercial story, if one ever exists, will be additive
   rather than a carve-out of the core.
 - Repo hygiene: SECURITY.md supported-versions table now says 0.5.x,
   CONTRIBUTING line-length matches ruff (120), blueprint
-  `stratum_version` pins normalized, stale `docs/stratum-blueprints-repo-readme.md`
+  `invicton_version` pins normalized, stale `docs/invicton-blueprints-repo-readme.md`
   stub removed, 0.1.0 changelog date fixed.
 
 - Default `registry_url` now points at the real community blueprint
-  library (`StratumOSS/Stratum` `blueprints/`) instead of the
+  library (then `StratumOSS/Stratum` `blueprints/`) instead of the
   never-created `stratum-community/profiles` repo.
 - Releases are published to PyPI via GitHub Actions trusted publishing
   on version tags (`.github/workflows/release.yml`).
 - Project moved from `github.com/rrskris/Stratum` to a dedicated org,
   `github.com/StratumOSS/Stratum` (old URL redirects automatically).
-- PyPI distribution name is now `stratumoss` (the plain `stratum` name is
-  an unrelated, long-abandoned package). The importable module is
-  unchanged — it's still `import stratum`.
+- PyPI distribution name became `stratumoss` (the plain `stratum` name was
+  an unrelated, long-abandoned package). The importable module was
+  unchanged at the time — still `import stratum` (later renamed in 0.6.0).
 
 ### Added
 
@@ -137,7 +157,7 @@ container image on GHCR (`ghcr.io/stratumoss/stratum`) and Docker Hub.
 
 **Local / on-prem image building (no cloud account required)**
 
-- New `kvm` provider (`plugins/providers/kvm.py` + `plugins/providers/_qemu_utils.py`) — builds hardened images on the machine running Stratum using `qemu-system-x86_64` (KVM-accelerated when `/dev/kvm` is available, falling back to slower TCG emulation). Reuses the existing Ansible-Lockdown hardening and OpenSCAP scanning flow unchanged.
+- New `kvm` provider (`plugins/providers/kvm.py` + `plugins/providers/_qemu_utils.py`) — builds hardened images on the machine running Invicton using `qemu-system-x86_64` (KVM-accelerated when `/dev/kvm` is available, falling back to slower TCG emulation). Reuses the existing Ansible-Lockdown hardening and OpenSCAP scanning flow unchanged.
 - Base images: pass a downloadable OS slug (`ubuntu22.04`, `ubuntu24.04`, `debian12`) to auto-download and checksum-verify the official upstream cloud image, or a path to a qcow2 you already have.
 - Output format: qcow2 (default) or raw, selectable via `output_format` in the build request. Every artifact ships with a `.sha256` checksum sidecar and a `metadata.json` provenance file.
 - Guest access via a per-build ephemeral SSH keypair injected through a cloud-init NoCloud seed ISO — key-only auth, no password ever set.
@@ -180,7 +200,7 @@ All four were found by actually running a full build end-to-end against a local 
 
 - Public-facing docs, the README, and generated SARIF compliance reports no
   longer reference the private development repository — all point at
-  `github.com/StratumOSS/Stratum`.
+  `github.com/invicton/Invicton`.
 - `POST /api/pipeline/build` no longer 500s when a `region` override is
   supplied (`TargetSpec` has no `region` field; the value is now recorded on
   the job for display instead of an invalid attribute assignment).
@@ -204,7 +224,7 @@ All four were found by actually running a full build end-to-end against a local 
   instead of being silently hardcoded off.
 - Added a request size cap on blueprint YAML uploads.
 - The AI Builder agent now requires explicit confirmation before provisioning
-  real cloud infrastructure by default (`STRATUM_AGENT_REQUIRE_CONFIRMATION`).
+  real cloud infrastructure by default (`INVICTON_AGENT_REQUIRE_CONFIRMATION`).
 
 ### Community
 
@@ -220,35 +240,35 @@ All four were found by actually running a full build end-to-end against a local 
 
 **Pluggable LLM backends for the AI Builder**
 
-The AI Builder is no longer tied to Anthropic. A new `stratum/core/llm/` package
+The AI Builder is no longer tied to Anthropic. A new `invicton/core/llm/` package
 provides a `LLMBackend` protocol with four production-ready implementations:
 
 - **Anthropic** (default) — `claude-opus-4-6` with adaptive extended thinking.
   Controlled by `ANTHROPIC_API_KEY`.
 - **OpenAI-compatible** — any endpoint that speaks the OpenAI Chat Completions
   protocol: OpenAI, Groq, Together AI, Fireworks, vLLM, LiteLLM. Controlled by
-  `STRATUM_LLM_API_KEY` / `OPENAI_API_KEY` + optional `STRATUM_LLM_BASE_URL`.
+  `INVICTON_LLM_API_KEY` / `OPENAI_API_KEY` + optional `INVICTON_LLM_BASE_URL`.
   Requires `uv add openai` (or `uv sync --extra llm-openai`).
 - **Ollama** — local open-weight models (llama3.3:70b, qwen2.5:72b, etc.) via
   Ollama's OpenAI-compatible endpoint. No API key needed. Good for air-gapped /
   on-prem deployments.
 - **AWS Bedrock** — Bedrock Converse API using existing AWS credentials (same
-  creds Stratum uses for EC2/AMI operations). No separate key required.
+  creds Invicton uses for EC2/AMI operations). No separate key required.
   Requires `uv add boto3` (or `uv sync --extra llm-bedrock`).
 
 Backend selection and model override via env vars:
 
 ```
-STRATUM_LLM_PROVIDER=anthropic | openai | ollama | bedrock
-STRATUM_LLM_MODEL=<model-name>
-STRATUM_LLM_API_KEY=<key>
-STRATUM_LLM_BASE_URL=<url>
-STRATUM_LLM_THINKING=0   # disable extended thinking
+INVICTON_LLM_PROVIDER=anthropic | openai | ollama | bedrock
+INVICTON_LLM_MODEL=<model-name>
+INVICTON_LLM_API_KEY=<key>
+INVICTON_LLM_BASE_URL=<url>
+INVICTON_LLM_THINKING=0   # disable extended thinking
 ```
 
 **Other additions**
 
-- `.env.example` — documented reference for all Stratum env vars with per-backend
+- `.env.example` — documented reference for all Invicton env vars with per-backend
   LLM examples.
 - `pyproject.toml`: new optional dep groups `llm-openai`, `llm-bedrock`, `llm-all`.
 
@@ -278,7 +298,7 @@ STRATUM_LLM_THINKING=0   # disable extended thinking
 - `POST /api/blueprints/validate` — validate YAML against the `ComplianceProfile` schema without saving. Returns `{"valid": bool, "errors": [...]}`. Use as a pre-commit hook or CI lint step.
 - `DELETE /api/blueprints/{name}` — delete a user-uploaded blueprint. Built-in templates return `403`; unknown names return `404`.
 - `PipelineBuildRequest.blueprint_yaml` — pass a full blueprint YAML inline in the build request body. Skips the upload step entirely; takes precedence over `profile_name` when both are supplied. Either field is required — `422` if neither is present.
-- `settings.user_profiles_dir` — new config key (`STRATUM_USER_PROFILES_DIR`, default `profiles/user/`). All blueprint list, get, download, delete, and preview endpoints now search both `profiles_dir` and `user_profiles_dir`.
+- `settings.user_profiles_dir` — new config key (`INVICTON_USER_PROFILES_DIR`, default `profiles/user/`). All blueprint list, get, download, delete, and preview endpoints now search both `profiles_dir` and `user_profiles_dir`.
 
 **Compliance Badge**
 

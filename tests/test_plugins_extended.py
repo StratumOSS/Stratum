@@ -22,9 +22,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from stratum.plugins.base_provider import BaseProvider, ProviderResult
-from stratum.plugins.loader import load_providers
-from stratum.plugins.subprocess_provider import (
+from invicton.plugins.base_provider import BaseProvider, ProviderResult
+from invicton.plugins.loader import load_providers
+from invicton.plugins.subprocess_provider import (
     _build_params,
     make_subprocess_provider_class,
 )
@@ -35,10 +35,10 @@ from stratum.plugins.subprocess_provider import (
 
 
 def _make_profile(**overrides):
-    from stratum.core.blueprint import ComplianceProfile
+    from invicton.core.blueprint import ComplianceProfile
 
     data = {
-        "stratum_version": "0.1.0",
+        "invicton_version": "0.1.0",
         "kind": "ComplianceProfile",
         "metadata": {"name": "test-profile", "version": "1.0.0"},
         "target": {"os": "ubuntu22.04", "provider": "aws", "base_image": "ami-00"},
@@ -218,7 +218,7 @@ class TestBuildParams:
         fake_path = tmp_path / "prehard.yml"
         fake_path.write_text("- hosts: all\n  tasks: []")
 
-        with patch("stratum.core.playbook_gen.generate_prehard_playbook", return_value=fake_path):
+        with patch("invicton.core.playbook_gen.generate_prehard_playbook", return_value=fake_path):
             params = _build_params(profile)
 
         assert "prehard_playbook_yaml" in params
@@ -227,7 +227,7 @@ class TestBuildParams:
     def test_params_prehard_exception_skipped(self):
         """If playbook_gen raises, _build_params still returns without crashing."""
         profile = _make_profile()
-        with patch("stratum.core.playbook_gen.generate_prehard_playbook", side_effect=RuntimeError("boom")):
+        with patch("invicton.core.playbook_gen.generate_prehard_playbook", side_effect=RuntimeError("boom")):
             params = _build_params(profile)
         assert "prehard_playbook_yaml" not in params
 
@@ -250,8 +250,8 @@ class TestSubprocessProviderMethods:
         provider = cls()
         profile = _make_profile()
 
-        with patch("stratum.plugins.subprocess_provider._call_rpc", return_value={"raw_xml": "<xccdf/>"}) as mock_rpc:
-            with patch("stratum.api.integrations.get_credentials", return_value={}):
+        with patch("invicton.plugins.subprocess_provider._call_rpc", return_value={"raw_xml": "<xccdf/>"}) as mock_rpc:
+            with patch("invicton.api.integrations.get_credentials", return_value={}):
                 result = provider.audit("ami-target-001", profile)
 
         mock_rpc.assert_called_once()
@@ -265,8 +265,8 @@ class TestSubprocessProviderMethods:
         provider = cls()
         profile = _make_profile()
 
-        with patch("stratum.plugins.subprocess_provider._call_rpc", return_value={}) as mock_rpc:
-            with patch("stratum.api.integrations.get_credentials", return_value={}):
+        with patch("invicton.plugins.subprocess_provider._call_rpc", return_value={}) as mock_rpc:
+            with patch("invicton.api.integrations.get_credentials", return_value={}):
                 provider.audit("ami-xyz-999", profile)
 
         _, _, kwargs_or_pos = mock_rpc.call_args.args[0], mock_rpc.call_args.args[1], mock_rpc.call_args.args[2]
@@ -277,8 +277,8 @@ class TestSubprocessProviderMethods:
         cls = _make_sp_class()
         provider = cls()
 
-        with patch("stratum.plugins.subprocess_provider._call_rpc", return_value={"raw_xml": "<xccdf/>"}) as mock_rpc:
-            with patch("stratum.api.integrations.get_credentials", return_value={}):
+        with patch("invicton.plugins.subprocess_provider._call_rpc", return_value={"raw_xml": "<xccdf/>"}) as mock_rpc:
+            with patch("invicton.api.integrations.get_credentials", return_value={}):
                 result = provider.scan_image({"image_id": "ami-scan-001"})
 
         mock_rpc.assert_called_once()
@@ -291,8 +291,8 @@ class TestSubprocessProviderMethods:
         provider = cls()
 
         creds = {"aws_access_key_id": "AKIA000"}
-        with patch("stratum.plugins.subprocess_provider._call_rpc", return_value={}) as mock_rpc:
-            with patch("stratum.api.integrations.get_credentials", return_value=creds):
+        with patch("invicton.plugins.subprocess_provider._call_rpc", return_value={}) as mock_rpc:
+            with patch("invicton.api.integrations.get_credentials", return_value=creds):
                 provider.scan_image({"image_id": "ami-001"})
 
         sent_params = mock_rpc.call_args.args[2]

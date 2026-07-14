@@ -22,8 +22,8 @@ import logging
 import subprocess
 from pathlib import Path
 
-from stratum.core.blueprint import ComplianceProfile
-from stratum.plugins.base_provider import BaseProvider, ProviderResult
+from invicton.core.blueprint import ComplianceProfile
+from invicton.plugins.base_provider import BaseProvider, ProviderResult
 
 logger = logging.getLogger(__name__)
 
@@ -58,10 +58,10 @@ class LocalProvider(BaseProvider):
 
     ``base_image`` in the blueprint is treated as the host address (IP or hostname).
     The provider expects the host to already be running and SSH-accessible using
-    the key / user configured in ``credentials`` (via the Stratum integrations UI)
+    the key / user configured in ``credentials`` (via the Invicton integrations UI)
     or the defaults below.
 
-    Credential fields (Stratum integrations UI):
+    Credential fields (Invicton integrations UI):
         ssh_user         SSH login username (default: root)
         private_key_path Path to the SSH private key file (default: ~/.ssh/id_rsa)
     """
@@ -73,9 +73,9 @@ class LocalProvider(BaseProvider):
     # ---------------------------------------------------------------------------
 
     def _credentials(self) -> tuple[str, str]:
-        """Return (ssh_user, private_key_path) from the Stratum credential store."""
+        """Return (ssh_user, private_key_path) from the Invicton credential store."""
         try:
-            from stratum.api.integrations import get_credentials
+            from invicton.api.integrations import get_credentials
 
             creds = get_credentials("local") or {}
         except Exception:
@@ -140,7 +140,7 @@ class LocalProvider(BaseProvider):
         host = instance_id
 
         # Step 1: pre-hardening (generated from blueprint)
-        from stratum.core.playbook_gen import generate_prehard_playbook
+        from invicton.core.playbook_gen import generate_prehard_playbook
 
         prehard_path = generate_prehard_playbook(profile)
         if prehard_path is not None:
@@ -155,7 +155,7 @@ class LocalProvider(BaseProvider):
     def snapshot(self, instance_id: str, profile: ComplianceProfile) -> ProviderResult:
         """Create a compressed tar archive of the remote root filesystem.
 
-        The archive is saved to the current directory on the Stratum server.
+        The archive is saved to the current directory on the Invicton server.
         For a real on-premises workflow, replace this with a ``qemu-img convert``
         call, a Packer build, or a hypervisor-specific snapshot API.
         """
@@ -204,9 +204,9 @@ class LocalProvider(BaseProvider):
         oscap_cmd = (
             f"sudo oscap xccdf eval "
             f"--profile {profile.compliance.profile} "
-            f"--results /tmp/stratum-audit.xml "
+            f"--results /tmp/invicton-audit.xml "
             f"{profile.compliance.datastream} || true; "
-            f"cat /tmp/stratum-audit.xml"
+            f"cat /tmp/invicton-audit.xml"
         )
         result = subprocess.run(
             ["ssh", "-i", key_path, *_SSH_OPTS, f"{ssh_user}@{target_id}", oscap_cmd],

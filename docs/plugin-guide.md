@@ -1,14 +1,14 @@
 # Provider Plugin Guide
 
-Add a new cloud provider or hypervisor without forking Stratum. Providers run
+Add a new cloud provider or hypervisor without forking Invicton. Providers run
 as isolated subprocesses (JSON-RPC over stdin/stdout) — they cannot affect the
 core engine.
 
 ## Minimal provider
 
 ```python
-from stratum.plugins.base_provider import BaseProvider, ProviderResult
-from stratum.core.blueprint import ComplianceProfile
+from invicton.plugins.base_provider import BaseProvider, ProviderResult
+from invicton.core.blueprint import ComplianceProfile
 
 class MyProvider(BaseProvider):
     name = "myprovider"        # must be unique
@@ -32,7 +32,7 @@ class MyProvider(BaseProvider):
         pass
 ```
 
-Drop the file into `plugins/providers/`. Stratum picks it up on the next
+Drop the file into `plugins/providers/`. Invicton picks it up on the next
 start. The UI provider dropdown and blueprint validator both update
 automatically.
 
@@ -45,22 +45,22 @@ automatically.
 | `snapshot(instance_id, profile)` | Snapshot to a golden image. Return `ProviderResult`. |
 | `teardown(instance_id)` | Unconditionally destroy the temp instance. |
 
-`teardown` must be safe to call after any failure — Stratum invokes it on
+`teardown` must be safe to call after any failure — Invicton invokes it on
 every failed build to avoid leaking cloud resources.
 
 ## Pip-installed providers
 
 Distribute a provider as a package by registering it under the
-`stratum.providers` entry-point group in your `pyproject.toml`:
+`invicton.providers` entry-point group in your `pyproject.toml`:
 
 ```toml
-[project.entry-points."stratum.providers"]
+[project.entry-points."invicton.providers"]
 myprovider = "mypackage.provider:MyProvider"
 ```
 
 ## Installing from the catalog
 
-Stratum ships a provider catalog (`plugins/catalog/`, also bundled in the PyPI
+Invicton ships a provider catalog (`plugins/catalog/`, also bundled in the PyPI
 package). The **Integrations** page lists available providers; installing one
 copies its script into `plugins/providers/` and hot-reloads the registry —
 equivalent to:

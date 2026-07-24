@@ -1,0 +1,551 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/invicton/bakex/main/docs/schema/hardening-blueprint.schema.json",
+  "title": "HardeningBlueprint",
+  "$defs": {
+    "ComplianceSpec": {
+      "properties": {
+        "benchmark": {
+          "title": "Benchmark",
+          "type": "string"
+        },
+        "profile": {
+          "title": "Profile",
+          "type": "string"
+        },
+        "datastream": {
+          "title": "Datastream",
+          "type": "string"
+        },
+        "fail_on_findings": {
+          "default": true,
+          "title": "Fail On Findings",
+          "type": "boolean"
+        },
+        "severity_threshold": {
+          "default": "medium",
+          "title": "Severity Threshold",
+          "type": "string"
+        },
+        "aide": {
+          "default": false,
+          "title": "Aide",
+          "type": "boolean"
+        },
+        "fips": {
+          "default": false,
+          "title": "Fips",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "benchmark",
+        "profile",
+        "datastream"
+      ],
+      "title": "ComplianceSpec",
+      "type": "object"
+    },
+    "ControlOverride": {
+      "properties": {
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "justification": {
+          "title": "Justification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "justification"
+      ],
+      "title": "ControlOverride",
+      "type": "object"
+    },
+    "ExtraVolume": {
+      "properties": {
+        "device_name": {
+          "title": "Device Name",
+          "type": "string"
+        },
+        "size_gb": {
+          "title": "Size Gb",
+          "type": "integer"
+        },
+        "volume_type": {
+          "default": "gp3",
+          "title": "Volume Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "device_name",
+        "size_gb"
+      ],
+      "title": "ExtraVolume",
+      "type": "object"
+    },
+    "HardeningConfig": {
+      "properties": {
+        "strategy": {
+          "$ref": "#/$defs/HardeningStrategy",
+          "default": "ansible-galaxy"
+        },
+        "role": {
+          "default": "auto",
+          "title": "Role",
+          "type": "string"
+        },
+        "repo_url": {
+          "default": "",
+          "title": "Repo Url",
+          "type": "string"
+        },
+        "playbook_file": {
+          "default": "site.yml",
+          "title": "Playbook File",
+          "type": "string"
+        },
+        "profile_tier": {
+          "default": "cis-l1",
+          "enum": [
+            "cis-l1",
+            "cis-l2",
+            "stig",
+            "custom"
+          ],
+          "title": "Profile Tier",
+          "type": "string"
+        },
+        "overrides": {
+          "items": {
+            "$ref": "#/$defs/RuleOverride"
+          },
+          "title": "Overrides",
+          "type": "array"
+        },
+        "add_rules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Add Rules",
+          "type": "array"
+        }
+      },
+      "title": "HardeningConfig",
+      "type": "object"
+    },
+    "HardeningStrategy": {
+      "enum": [
+        "ansible-galaxy",
+        "git",
+        "none"
+      ],
+      "title": "HardeningStrategy",
+      "type": "string"
+    },
+    "MountEntry": {
+      "description": "A single filesystem mount point with CIS-compliant options.",
+      "properties": {
+        "device": {
+          "title": "Device",
+          "type": "string"
+        },
+        "mountpoint": {
+          "title": "Mountpoint",
+          "type": "string"
+        },
+        "fstype": {
+          "default": "tmpfs",
+          "title": "Fstype",
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Options",
+          "type": "array"
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size"
+        },
+        "mount_type": {
+          "default": "primary",
+          "enum": [
+            "primary",
+            "lvm",
+            "swap"
+          ],
+          "title": "Mount Type",
+          "type": "string"
+        },
+        "encrypt": {
+          "default": false,
+          "title": "Encrypt",
+          "type": "boolean"
+        },
+        "lvm_vg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lvm Vg"
+        }
+      },
+      "required": [
+        "device",
+        "mountpoint"
+      ],
+      "title": "MountEntry",
+      "type": "object"
+    },
+    "ProfileMetadata": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "author": {
+          "default": "",
+          "title": "Author",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "source_badge": {
+          "default": "Local",
+          "title": "Source Badge",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "ProfileMetadata",
+      "type": "object"
+    },
+    "RootConfig": {
+      "description": "Root account configuration.",
+      "properties": {
+        "lock": {
+          "default": true,
+          "title": "Lock",
+          "type": "boolean"
+        },
+        "password_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Password Hash"
+        }
+      },
+      "title": "RootConfig",
+      "type": "object"
+    },
+    "RuleOverride": {
+      "description": "Per-rule customisation within a hardening profile tier.",
+      "properties": {
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "rule_id"
+      ],
+      "title": "RuleOverride",
+      "type": "object"
+    },
+    "SystemConfig": {
+      "description": "OS-level settings applied before Ansible-Lockdown hardening.",
+      "properties": {
+        "hostname": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hostname"
+        },
+        "timezone": {
+          "default": "UTC",
+          "title": "Timezone",
+          "type": "string"
+        },
+        "locale": {
+          "default": "en_US.UTF-8",
+          "title": "Locale",
+          "type": "string"
+        },
+        "selinux_mode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selinux Mode"
+        }
+      },
+      "title": "SystemConfig",
+      "type": "object"
+    },
+    "TargetSpec": {
+      "properties": {
+        "os": {
+          "title": "Os",
+          "type": "string"
+        },
+        "arch": {
+          "default": "x86_64",
+          "title": "Arch",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "base_image": {
+          "title": "Base Image",
+          "type": "string"
+        },
+        "instance_type": {
+          "default": "",
+          "title": "Instance Type",
+          "type": "string"
+        },
+        "root_volume_size_gb": {
+          "default": 20,
+          "title": "Root Volume Size Gb",
+          "type": "integer"
+        },
+        "extra_volumes": {
+          "items": {
+            "$ref": "#/$defs/ExtraVolume"
+          },
+          "title": "Extra Volumes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "os",
+        "provider",
+        "base_image"
+      ],
+      "title": "TargetSpec",
+      "type": "object"
+    },
+    "UserAccount": {
+      "description": "A non-root user account to create on the hardened image.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "comment": {
+          "default": "",
+          "title": "Comment",
+          "type": "string"
+        },
+        "groups": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Groups",
+          "type": "array"
+        },
+        "shell": {
+          "default": "/bin/bash",
+          "title": "Shell",
+          "type": "string"
+        },
+        "system": {
+          "default": false,
+          "title": "System",
+          "type": "boolean"
+        },
+        "password_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Password Hash"
+        },
+        "ssh_authorized_keys": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ssh Authorized Keys",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "UserAccount",
+      "type": "object"
+    },
+    "UsersConfig": {
+      "description": "Root and extra user account configuration.",
+      "properties": {
+        "root": {
+          "$ref": "#/$defs/RootConfig"
+        },
+        "accounts": {
+          "items": {
+            "$ref": "#/$defs/UserAccount"
+          },
+          "title": "Accounts",
+          "type": "array"
+        }
+      },
+      "title": "UsersConfig",
+      "type": "object"
+    }
+  },
+  "description": "BakeX blueprint: describes exactly how to build a reproducible hardened image.\n\nkind: ComplianceProfile  \u2014 legacy (compliance-only, no system/filesystem/users)\nkind: HardeningBlueprint \u2014 full blueprint with system, filesystem, users sections",
+  "properties": {
+    "bakex_version": {
+      "title": "Bakex Version",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "ComplianceProfile",
+        "HardeningBlueprint"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "metadata": {
+      "$ref": "#/$defs/ProfileMetadata"
+    },
+    "target": {
+      "$ref": "#/$defs/TargetSpec"
+    },
+    "compliance": {
+      "$ref": "#/$defs/ComplianceSpec"
+    },
+    "controls": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "$ref": "#/$defs/ControlOverride"
+          }
+        ]
+      },
+      "title": "Controls",
+      "type": "object"
+    },
+    "hardening": {
+      "$ref": "#/$defs/HardeningConfig"
+    },
+    "system": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SystemConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "filesystem": {
+      "items": {
+        "$ref": "#/$defs/MountEntry"
+      },
+      "title": "Filesystem",
+      "type": "array"
+    },
+    "users": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/UsersConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "bakex_version",
+    "kind",
+    "metadata",
+    "target",
+    "compliance"
+  ],
+  "type": "object"
+}

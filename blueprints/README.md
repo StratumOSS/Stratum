@@ -48,6 +48,15 @@ Examples:
 See [CONTRIBUTING.md](CONTRIBUTING.md) for a full field-by-field blueprint walkthrough,
 naming convention, and SCAP profile reference table.
 
+## For AI agents
+
+Blueprints are designed to be machine-generated. Two artifacts make that reliable:
+
+- **[JSON Schema](../docs/schema/hardening-blueprint.schema.json)** (`docs/schema/hardening-blueprint.schema.json`) — the authoritative field reference, generated from the Pydantic model BakeX validates against, so it can't drift from the real rules.
+- **`bakex validate FILE --json`** — machine-readable pass/fail (exit `0`/`1`). Always validate a generated blueprint before opening a PR or triggering a build.
+
+`blueprints/index.json` is the machine-readable inventory of what already exists.
+
 ## Contribution Checklist
 
 - Start from an existing blueprint for the closest OS/provider.

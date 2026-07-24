@@ -17,6 +17,16 @@ bakex validate blueprints/ubuntu/22.04/cis-l1-aws.yaml   # schema-check; exit 0/
 bakex build    blueprints/ubuntu/22.04/cis-l1-aws.yaml   # build the golden image (also accepts a bundled profile name)
 ```
 
+## Blueprint Library (for agents)
+
+A `HardeningBlueprint` is a single YAML file describing an OS + provider + compliance
+profile. To generate one, follow the published JSON Schema and validate before building:
+
+- [docs/schema/hardening-blueprint.schema.json](docs/schema/hardening-blueprint.schema.json) — JSON Schema (Draft 2020-12) for the blueprint format; the authoritative field reference. Generated from the same Pydantic model BakeX validates against, so it never drifts.
+- [blueprints/index.json](blueprints/index.json) — machine-readable list of every community blueprint.
+- [blueprints/CONTRIBUTING.md](blueprints/CONTRIBUTING.md) — field-by-field authoring guide + the acceptance criteria for a merged blueprint.
+- Validate any blueprint with `bakex validate FILE --json` (exit 0 = valid, 1 = invalid).
+
 ## Key files
 
 - [README](README.md) — Main landing page and setup guide.

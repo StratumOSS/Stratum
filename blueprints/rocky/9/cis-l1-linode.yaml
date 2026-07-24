@@ -1,6 +1,6 @@
 # BakeX HardeningBlueprint — Rocky Linux 9 CIS Level 1 Server (Linode / Akamai Cloud)
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

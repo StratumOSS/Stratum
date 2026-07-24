@@ -1,6 +1,6 @@
 # BakeX HardeningBlueprint — Debian 12 CIS Level 1 Server (GCP)
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

@@ -144,6 +144,43 @@ jobs:
               sys.exit(1)
           print(f"index.json consistent with {len(on_disk)} blueprint files.")
           EOF
+      - name: Check blueprints/ and profiles/templates/ are in sync
+        run: |
+          uv run python - <<'EOF'
+          import sys
+          from pathlib import Path
+
+          import yaml
+
+          # Each community blueprint has a byte-identical copy bundled under
+          # profiles/templates/. They are kept in lock-step by hand, so guard
+          # against drift: pair them by metadata.name and compare contents.
+          def by_name(directory: str) -> dict[str, Path]:
+              out: dict[str, Path] = {}
+              for p in Path(directory).rglob("*.yaml"):
+                  name = yaml.safe_load(p.read_text())["metadata"]["name"]
+                  out[name] = p
+              return out
+
+          blueprints = by_name("blueprints")
+          templates = by_name("profiles/templates")
+
+          errors = []
+          for name in sorted(set(blueprints) | set(templates)):
+              bp, tpl = blueprints.get(name), templates.get(name)
+              if bp is None:
+                  errors.append(f"  '{name}': only in profiles/templates/ ({tpl})")
+              elif tpl is None:
+                  errors.append(f"  '{name}': only in blueprints/ ({bp})")
+              elif bp.read_bytes() != tpl.read_bytes():
+                  errors.append(f"  '{name}': {bp} and {tpl} have drifted")
+
+          if errors:
+              print("blueprints/ ↔ profiles/templates/ out of sync:")
+              print("\n".join(errors))
+              sys.exit(1)
+          print(f"blueprints/ and profiles/templates/ in sync ({len(blueprints)} pairs).")
+          EOF
 
   # Report-only: Invigil grades the repo's doctrine (see README badge); the
   # scorecard lands as a PR comment and in the job summary. Never blocks CI.

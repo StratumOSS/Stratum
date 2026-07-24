@@ -10,6 +10,13 @@ cd bakex
 docker compose up -d
 ```
 
+Blueprints are scriptable without the UI — useful for agents:
+
+```bash
+bakex validate blueprints/ubuntu/22.04/cis-l1-aws.yaml   # schema-check; exit 0/1; --json for structured output
+bakex build    blueprints/ubuntu/22.04/cis-l1-aws.yaml   # build the golden image (also accepts a bundled profile name)
+```
+
 ## Key files
 
 - [README](README.md) — Main landing page and setup guide.

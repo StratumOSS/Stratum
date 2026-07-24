@@ -25,6 +25,13 @@ bakex serve --port 8000              # or: uvicorn bakex.main:app --port 8000
 # → http://localhost:8000
 ```
 
+Prefer the command line? Blueprints are scriptable end to end:
+
+```bash
+bakex validate blueprints/ubuntu/22.04/cis-l1-aws.yaml   # schema-check (exit 0/1, --json available)
+bakex build    blueprints/ubuntu/22.04/cis-l1-aws.yaml   # or: bakex build ubuntu22-cis-l1-aws
+```
+
 **First login:** any username + your admin token as the password. If you didn't
 set `BAKEX_ADMIN_TOKEN`, a token was generated on first startup and saved to
 `data/.admin_token` (also printed in the startup logs).

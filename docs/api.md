@@ -69,13 +69,23 @@ API keys are created in **Settings -> API Keys** or through the API key endpoint
 
 Prefer Application Default Credentials or impersonation for GCP. Use `service_account_json` only when user-managed keys are allowed by policy.
 
+## CLI Commands
+
+| Command | Purpose |
+|---|---|
+| `bakex serve` | Run the web app + API |
+| `bakex version` | Print the build version |
+| `bakex validate FILE...` | Validate blueprint YAML against the `HardeningBlueprint` schema. `--json` for machine-readable results. |
+| `bakex build FILE\|NAME` | Build a hardened image from a blueprint file, or a bundled profile name. `--output-dir DIR`, `--json`. |
+
 ## CLI Exit Status Codes
 
 The `bakex` command-line interface uses the following exit codes:
 
 | Exit Code | Meaning / Reason |
 |---|---|
-| `0` | Success (e.g., `bakex version`, or `bakex serve` on graceful termination) |
+| `0` | Success — `bakex version`; `bakex serve` graceful termination; `bakex validate` all files valid; `bakex build` job completed |
+| `1` | Runtime failure — `bakex validate` one or more files invalid; `bakex build` blueprint not found or job failed |
 | `2` | Usage error or invalid arguments |
 
 ## More Pipeline Examples

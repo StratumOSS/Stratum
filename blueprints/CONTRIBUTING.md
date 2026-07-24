@@ -77,17 +77,12 @@ Key things to get right:
 ## Step 6 — Validate locally
 
 ```bash
-uv run python - <<'PY'
-import yaml
-from bakex.core.blueprint import ComplianceProfile
-
-path = "blueprints/rocky/9/cis-l2-aws.yaml"
-with open(path) as f:
-    data = yaml.safe_load(f)
-ComplianceProfile.model_validate(data)
-print(f"OK {path}")
-PY
+bakex validate blueprints/rocky/9/cis-l2-aws.yaml
 ```
+
+This checks the file against the `HardeningBlueprint` schema and exits non-zero on
+any error — the same check CI runs. Add `--json` for machine-readable output if you're
+scripting it.
 
 ## Step 7 — Update index.json
 

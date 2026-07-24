@@ -87,6 +87,15 @@ bakex serve --port 8000              # or: uvicorn bakex.main:app --port 8000
 
 `bakex version` prints the build; `bakex serve --help` lists options.
 
+Blueprints are scriptable end to end — no UI required:
+
+```bash
+bakex validate blueprints/ubuntu/22.04/cis-l1-aws.yaml   # schema-check (exit 0/1, --json available)
+bakex build    blueprints/ubuntu/22.04/cis-l1-aws.yaml   # build the golden image from the blueprint
+```
+
+`bakex build` also accepts a bundled profile name (e.g. `bakex build ubuntu22-cis-l1-aws`).
+
 Built-in blueprint templates and the provider catalog ship inside the package,
 so this works from any directory; runtime state (`data/`, `profiles/user/`) is
 created where you launch. Ansible and OpenSCAP must be on the host for real

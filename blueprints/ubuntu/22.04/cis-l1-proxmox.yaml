@@ -7,7 +7,7 @@
 #   3. Convert to template: qm template 9000
 #   4. Set base_image to that VMID
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

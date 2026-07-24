@@ -1,6 +1,6 @@
 # BakeX HardeningBlueprint — Ubuntu 22.04 LTS CIS Level 1 Server (Linode)
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

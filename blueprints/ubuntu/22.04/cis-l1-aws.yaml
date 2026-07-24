@@ -7,7 +7,7 @@
 # to the same base image — the filesystem layout, users, and every CIS control
 # are all declared here and version-controlled with your infrastructure code.
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:
@@ -94,7 +94,9 @@ users:
 compliance:
   benchmark: xccdf_org.ssgproject.content_benchmark_UBUNTU2204
   profile: xccdf_org.ssgproject.content_profile_cis_level1_server
-  # Install on target: apt install ssg-debderived
+  # Ubuntu ships no SCAP content package (scap-security-guide / ssg-* don't exist
+  # in the Ubuntu archive). BakeX auto-downloads the matching datastream from a
+  # ComplianceAsCode/content release (checksum-verified) to the path below.
   datastream: /usr/share/xml/scap/ssg/content/ssg-ubuntu2204-ds.xml
   fail_on_findings: true
   severity_threshold: medium

@@ -6,7 +6,7 @@
 #   2. qemu-guest-agent installed in the template
 #   3. Proxmox credentials configured in BakeX integrations
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

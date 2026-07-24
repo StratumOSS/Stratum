@@ -5,7 +5,7 @@
 #
 # Produces an identical hardened GCP custom image every time.
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

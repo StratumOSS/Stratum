@@ -3,7 +3,7 @@
 # Set api_token in BakeX integrations then run:
 #   bakex build ubuntu22-cis-l1-digitalocean
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

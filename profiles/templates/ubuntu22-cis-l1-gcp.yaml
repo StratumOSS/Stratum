@@ -5,7 +5,7 @@
 # only the target.provider and target.base_image differ.
 # This cross-provider portability is the core BakeX USP.
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

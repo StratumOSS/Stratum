@@ -4,7 +4,7 @@
 # subscription_id, resource_group) then run:
 #   bakex build rocky9-cis-l1-azure
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

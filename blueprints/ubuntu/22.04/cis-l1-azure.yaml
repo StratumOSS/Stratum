@@ -2,7 +2,7 @@
 #
 # Same compliance posture as ubuntu22-cis-l1-aws.yaml, targeting Azure.
 
-bakex_version: "0.5.0"
+bakex_version: "0.6.0"
 kind: HardeningBlueprint
 
 metadata:

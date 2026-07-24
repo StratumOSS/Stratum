@@ -154,9 +154,15 @@ jobs:
 
           import yaml
 
-          # Each community blueprint has a byte-identical copy bundled under
-          # profiles/templates/. They are kept in lock-step by hand, so guard
-          # against drift: pair them by metadata.name and compare contents.
+          # Some blueprints are also bundled as built-in runtime templates under
+          # profiles/templates/ (shipped in the wheel). Where a blueprint and a
+          # template share a metadata.name they are the *same* artifact and must
+          # stay byte-identical — guard against editing one copy but not the other.
+          #
+          # This is intentionally NOT a bijection: a community blueprint that is
+          # not (yet) a bundled template has no counterpart, and that is fine —
+          # the community contribution flow only adds to blueprints/. Only paired
+          # names are checked; unpaired files on either side are allowed.
           def by_name(directory: str) -> dict[str, Path]:
               out: dict[str, Path] = {}
               for p in Path(directory).rglob("*.yaml"):
@@ -166,22 +172,19 @@ jobs:
 
           blueprints = by_name("blueprints")
           templates = by_name("profiles/templates")
+          shared = sorted(set(blueprints) & set(templates))
 
-          errors = []
-          for name in sorted(set(blueprints) | set(templates)):
-              bp, tpl = blueprints.get(name), templates.get(name)
-              if bp is None:
-                  errors.append(f"  '{name}': only in profiles/templates/ ({tpl})")
-              elif tpl is None:
-                  errors.append(f"  '{name}': only in blueprints/ ({bp})")
-              elif bp.read_bytes() != tpl.read_bytes():
-                  errors.append(f"  '{name}': {bp} and {tpl} have drifted")
-
-          if errors:
-              print("blueprints/ ↔ profiles/templates/ out of sync:")
-              print("\n".join(errors))
+          drifted = [
+              f"  '{name}': {blueprints[name]} and {templates[name]} have drifted"
+              for name in shared
+              if blueprints[name].read_bytes() != templates[name].read_bytes()
+          ]
+          if drifted:
+              print("A blueprint and its bundled template copy have drifted apart:")
+              print("\n".join(drifted))
+              print("\nEdit both copies together, or run the sync so they match.")
               sys.exit(1)
-          print(f"blueprints/ and profiles/templates/ in sync ({len(blueprints)} pairs).")
+          print(f"blueprint/template pairs in sync ({len(shared)} shared, no drift).")
           EOF
 
   # Report-only: Invigil grades the repo's doctrine (see README badge); the
